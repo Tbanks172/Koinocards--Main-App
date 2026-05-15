@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Koino</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:#13121A;min-height:100vh;-webkit-text-size-adjust:100%}
+body{font-family:'Outfit',system-ui,sans-serif;color:#F2EFE9;overflow-x:hidden}
+div[onclick]{cursor:pointer}
+button{-webkit-appearance:none;appearance:none;font-family:'Outfit',system-ui,sans-serif;cursor:pointer}
+
+.screen{display:none;min-height:100vh;flex-direction:column;background:#13121A}
+.screen.active{display:flex}
+
+/* ── DYNAMIC ISLAND ── */
+.di{
+position:fixed;top:12px;left:50%;transform:translateX(-50%);
+background:#1E1C2A;border-radius:22px;
+padding:9px 22px;
+display:flex;align-items:center;gap:7px;
+z-index:200;box-shadow:0 0 0 1px rgba(255,255,255,.10);
+min-width:110px;justify-content:center;
+}
+.di-dot{
+width:7px;height:7px;border-radius:50%;
+background:#9D6FFF;box-shadow:0 0 10px #9D6FFF;
+animation:dp 2.5s ease-in-out infinite;
+}
+@keyframes dp{0%,100%{opacity:1}50%{opacity:.4;transform:scale(.7)}}
+.di-label{
+font-family:‘DM Mono’,monospace;font-size:10px;
+letter-spacing:2px;color:#888;
+}
+
+/* ══ HOME ══ */
+#home{overflow-y:auto;padding-bottom:40px}
+
+.home-header{
+padding:62px 24px 0;
+display:flex;align-items:flex-start;justify-content:space-between;
+}
+.k-logo{
+font-family:‘Playfair Display’,Georgia,serif;
+font-size:48px;font-weight:900;
+color:#F2EFE9;letter-spacing:-2px;line-height:1;
+display:flex;align-items:flex-start;
+}
+.k-star{
+font-size:18px;color:#A78BFA;margin-left:2px;margin-top:5px;
+animation:spin 10s linear infinite;display:inline-block;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.pro-badge{
+display:flex;align-items:center;gap:4px;
+background:linear-gradient(135deg,#7C3AED,#5B21B6);
+padding:7px 14px;border-radius:20px;
+font-size:12px;font-weight:700;color:white;letter-spacing:.5px;
+box-shadow:0 4px 18px rgba(124,58,237,.45);
+margin-top:6px;
+}
+
+.home-sub{
+padding:12px 24px 28px;
+font-size:16px;color:#888;font-weight:400;letter-spacing:.1px;
+}
+
+/* ── FIX 3: SEGMENT TABS fill full width ── */
+.segs{
+display:flex;gap:0;padding:0 24px 24px;
+width:100%;
+}
+.seg{
+flex:1;
+padding:11px 0;border-radius:30px;
+font-size:15px;font-weight:600;
+color:#888;background:transparent;border:none;
+transition:all .22s;
+text-align:center;
+}
+.seg.on{
+background:linear-gradient(135deg,#8B5CF6,#6D28D9);
+color:white;
+box-shadow:0 4px 20px rgba(139,92,246,.45);
+}
+
+/* CATEGORY ROWS */
+.cats{padding:0 16px;display:flex;flex-direction:column;gap:10px}
+.cat{
+display:flex;align-items:center;gap:16px;
+padding:18px;border-radius:22px;
+background:#1E1C2A;
+border:1px solid rgba(255,255,255,.09);
+transition:transform .15s;
+}
+.cat:active{transform:scale(.98)}
+.emo{
+width:58px;height:58px;border-radius:18px;
+display:flex;align-items:center;justify-content:center;
+font-size:30px;flex-shrink:0;
+filter:drop-shadow(0 4px 8px rgba(0,0,0,.4));
+}
+.cat-info{flex:1}
+.cat-name{
+font-family:‘Playfair Display’,Georgia,serif;
+font-size:20px;font-weight:700;color:#F2EFE9;
+letter-spacing:-.3px;margin-bottom:5px;
+}
+.cat-desc{font-size:14px;color:#888;line-height:1.4}
+.chevron{color:#4A4860;font-size:22px;font-weight:200}
+
+/* ══ CARDS SCREEN ══ */
+#cards{overflow:hidden;position:relative}
+
+.c-header{
+display:flex;align-items:center;justify-content:space-between;
+padding:58px 20px 14px;flex-shrink:0;
+}
+.c-back{
+width:44px;height:44px;border-radius:50%;
+background:#1E1C2A;border:1px solid rgba(255,255,255,.12);
+display:flex;align-items:center;justify-content:center;
+font-size:20px;color:#AAA;flex-shrink:0;
+}
+.c-mid{text-align:center;flex:1;padding:0 12px}
+.c-catname{
+font-family:‘Playfair Display’,serif;
+font-size:21px;font-weight:700;color:#F2EFE9;letter-spacing:-.3px;
+}
+.c-subdesc{font-size:12px;color:#888;margin-top:3px}
+.c-num{
+font-family:‘DM Mono’,monospace;font-size:12px;color:#999;
+background:#1E1C2A;padding:7px 13px;border-radius:12px;
+border:1px solid rgba(255,255,255,.10);flex-shrink:0;
+}
+
+/* PROGRESS */
+.prog{padding:2px 20px 14px;flex-shrink:0}
+.prog-t{height:3px;background:rgba(255,255,255,.12);border-radius:2px}
+.prog-f{height:100%;background:linear-gradient(90deg,#8B5CF6,#C4B5FD);border-radius:2px;transition:width .4s}
+
+/* STACK */
+.stack{
+flex:1;display:flex;align-items:center;justify-content:center;
+position:relative;overflow:hidden;padding:0 20px;
+}
+.si{
+position:absolute;top:20px;
+padding:7px 16px;border-radius:20px;
+font-size:13px;font-weight:700;letter-spacing:.5px;
+opacity:0;transition:opacity .12s;pointer-events:none;z-index:20;
+}
+.si-l{left:24px;background:rgba(239,68,68,.95);color:white}
+.si-r{right:24px;background:rgba(139,92,246,.95);color:white}
+
+/* FIX 1: Cards get overflow:hidden so back-card text can’t bleed through */
+.qcard{
+position:absolute;
+width:100%;max-width:370px;
+min-height:400px;
+border-radius:28px;
+padding:32px 28px 28px;
+display:flex;flex-direction:column;
+user-select:none;-webkit-user-select:none;
+will-change:transform;
+box-shadow:0 24px 64px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.08);
+overflow:hidden;
+}
+.qcard.c0{z-index:3;transform:translateX(0) rotate(0)}
+.qcard.c1{z-index:2;transform:translateY(12px) scale(.95);opacity:.7;pointer-events:none}
+.qcard.c2{z-index:1;transform:translateY(24px) scale(.90);opacity:.4;pointer-events:none}
+.qcard.exit-l{z-index:4;transform:translateX(-130%) rotate(-18deg);opacity:0;transition:transform .38s ease,opacity .38s}
+.qcard.exit-r{z-index:4;transform:translateX(130%) rotate(18deg);opacity:0;transition:transform .38s ease,opacity .38s}
+
+/* hide content of non-top cards visually */
+.qcard.c1 .qcard-q,
+.qcard.c1 .qcard-emoji,
+.qcard.c1 .qcard-foot,
+.qcard.c2 .qcard-q,
+.qcard.c2 .qcard-emoji,
+.qcard.c2 .qcard-foot {
+visibility: hidden;
+}
+
+.qcard-emoji{
+font-size:40px;margin-bottom:22px;
+filter:drop-shadow(0 6px 12px rgba(0,0,0,.3));
+line-height:1;
+}
+.qcard-q{
+font-family:‘Playfair Display’,Georgia,serif;
+font-size:27px;font-weight:700;line-height:1.38;
+color:#F2EFE9;flex:1;letter-spacing:-.5px;
+}
+.qcard-foot{
+margin-top:28px;padding-top:18px;
+border-top:1px solid rgba(255,255,255,.12);
+display:flex;align-items:center;justify-content:space-between;
+}
+.qcard-hint{font-size:12px;color:rgba(255,255,255,.5);font-style:italic}
+.qcard-swipe{font-family:‘DM Mono’,monospace;font-size:9px;color:rgba(255,255,255,.35);letter-spacing:1.5px}
+
+/* ACTIONS */
+.actions{
+display:flex;align-items:center;justify-content:center;
+gap:16px;padding:14px 20px 44px;flex-shrink:0;
+}
+.abtn{
+width:58px;height:58px;border-radius:50%;
+display:flex;align-items:center;justify-content:center;
+font-size:22px;
+background:#1E1C2A;border:1px solid rgba(255,255,255,.12);
+color:#AAA;transition:transform .15s;
+}
+.abtn:active{transform:scale(.88)}
+.abtn-main{
+width:76px;height:76px;font-size:28px;
+background:linear-gradient(135deg,#8B5CF6,#6D28D9);
+border:none !important;color:white;
+box-shadow:0 8px 30px rgba(139,92,246,.6);
+}
+.abtn-fav.faved{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.35);color:#EF4444}
+
+/* DONE */
+.done-ov{
+position:absolute;inset:0;background:#13121A;
+display:none;flex-direction:column;
+align-items:center;justify-content:center;
+padding:40px 28px;text-align:center;z-index:30;
+}
+.done-ring{
+width:116px;height:116px;border-radius:50%;
+background:linear-gradient(135deg,#8B5CF6,#6D28D9);
+display:flex;align-items:center;justify-content:center;
+font-size:50px;margin-bottom:28px;
+box-shadow:0 20px 60px rgba(139,92,246,.6);
+}
+.done-t{
+font-family:‘Playfair Display’,serif;
+font-size:34px;font-weight:900;color:#F2EFE9;
+margin-bottom:10px;letter-spacing:-.5px;
+}
+.done-s{font-size:15px;color:#888;line-height:1.6;max-width:260px;margin-bottom:32px}
+.done-b1{
+width:100%;max-width:300px;padding:16px;border-radius:16px;
+background:linear-gradient(135deg,#8B5CF6,#6D28D9);
+color:white;font-size:16px;font-weight:700;border:none;
+margin-bottom:10px;box-shadow:0 8px 24px rgba(139,92,246,.45);
+}
+.done-b2{
+width:100%;max-width:300px;padding:15px;border-radius:16px;
+background:#1E1C2A;color:#AAA;font-size:15px;
+border:1px solid rgba(255,255,255,.12);
+}
+
+/* TOAST */
+.toast{
+position:fixed;bottom:32px;left:50%;
+transform:translateX(-50%) translateY(20px);
+background:#2A2840;color:#F2EFE9;font-size:13px;font-weight:500;
+padding:10px 22px;border-radius:20px;
+box-shadow:0 8px 24px rgba(0,0,0,.4);
+opacity:0;transition:all .3s;z-index:999;
+white-space:nowrap;border:1px solid rgba(255,255,255,.12);
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+
+</head>
+<body>
+
+<div class="di">
+  <div class="di-dot"></div>
+  <div class="di-label">KOINO</div>
+</div>
+
+<!-- ══ HOME ══ -->
+
+<div id="home" class="screen active">
+  <div class="home-header">
+    <div class="k-logo">Koino<span class="k-star">✦</span></div>
+    <div class="pro-badge">💎 PRO</div>
+  </div>
+  <div class="home-sub">What are we exploring today?</div>
+
+  <div class="segs">
+    <div class="seg on" onclick="setSeg(this,'insight')">Insight</div>
+    <div class="seg" onclick="setSeg(this,'couple')">Couple</div>
+    <div class="seg" onclick="setSeg(this,'fun')">Fun</div>
+  </div>
+
+  <div class="cats" id="cats"></div>
+</div>
+
+<!-- ══ CARDS ══ -->
+
+<div id="cards" class="screen">
+  <div class="c-header">
+    <div class="c-back" onclick="goHome()">←</div>
+    <div class="c-mid">
+      <div class="c-catname" id="c-catname">Deep Insight</div>
+      <div class="c-subdesc" id="c-subdesc">Take your time</div>
+    </div>
+    <div class="c-num" id="c-num">1/5</div>
+  </div>
+  <div class="prog"><div class="prog-t"><div class="prog-f" id="prog-f" style="width:0%"></div></div></div>
+
+  <div class="stack" id="stack">
+    <div class="si si-l" id="si-l">SKIP</div>
+    <div class="si si-r" id="si-r">✓ NEXT</div>
+  </div>
+
+  <div class="actions">
+    <!-- FIX 4: doUndo() instead of doSwipe('left') for the return/undo button -->
+    <div class="abtn" id="undo-btn" onclick="doUndo()">↩</div>
+    <div class="abtn abtn-main" onclick="doSwipe('right')">→</div>
+    <div class="abtn abtn-fav" id="fav-btn" onclick="doFav()">♡</div>
+  </div>
+
+  <div class="done-ov" id="done-ov">
+    <div class="done-ring">✦</div>
+    <div class="done-t">All done!</div>
+    <p class="done-s">You've gone through all the cards. Sit with what came up.</p>
+    <button class="done-b1" onclick="doRestart()">Shuffle &amp; Play Again</button>
+    <button class="done-b2" onclick="goHome()">Back to Home</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════
+// DATA
+// ════════════════════════════════
+const D={
+  insight:[
+    {id:'deep-insight',name:'Deep Insight',desc:'Questions that go straight to the heart',emoji:'👁️',bg:'#0E0B18',accent:'#7C3AED',hint:'Be honest with yourself',cards:[
+      {q:"What is one thing you keep telling yourself you'll do someday — but haven't started yet?",hint:"No more someday"},
+      {q:"When did you last feel truly at peace? What were you doing?",hint:"Close your eyes and remember"},
+      {q:"What belief about yourself is holding you back the most right now?",hint:"The answer might surprise you"},
+      {q:"If your closest friend described you honestly, what would they say you need to work on?",hint:"No filters here"},
+      {q:"What version of yourself are you most afraid of becoming?",hint:"Sit with this one"},
+    ]},
+    {id:'late-night',name:'Late Night Talk',desc:'Late-night talks hit different',emoji:'🌙',bg:'#0A0C18',accent:'#6366F1',hint:'3am energy only',cards:[
+      {q:"What thought keeps you up at night that you've never told anyone?",hint:"3am energy only"},
+      {q:"What do you wish someone would just ask you about?",hint:"Someone's listening now"},
+      {q:"Is there something you've been overthinking that you need to just say out loud?",hint:"Say it. Right now."},
+      {q:"What feeling have you been avoiding dealing with lately?",hint:"Name it to tame it"},
+      {q:"What's something you know you need to change but keep delaying?",hint:"No more delays"},
+    ]},
+    {id:'explore-self',name:'Explore Yourself',desc:'The journey to self-discovery starts here',emoji:'😈',bg:'#120A18',accent:'#8B5CF6',hint:'No judgement here',cards:[
+      {q:"What part of your personality do you show the world vs. what you hide?",hint:"The real you"},
+      {q:"What would you do differently if you knew nobody was watching or judging?",hint:"Be completely free"},
+      {q:"What childhood version of yourself would be proud of you right now?",hint:"Think back"},
+      {q:"What does your ideal life actually look like — not what you're supposed to want?",hint:"Dream without limits"},
+      {q:"What have you outgrown that you're still holding on to?",hint:"Let it go"},
+    ]},
+    {id:'healing-heart',name:'Healing Heart',desc:'Healing starts with the right questions',emoji:'💗',bg:'#180A10',accent:'#EC4899',hint:'Be gentle with yourself',cards:[
+      {q:"What are you still carrying from your past that you haven't fully let go of?",hint:"It's okay to feel this"},
+      {q:"When did you last forgive yourself for something? Did you fully mean it?",hint:"Self-forgiveness matters"},
+      {q:"What do you need to hear right now that nobody has said to you?",hint:"Say it to yourself"},
+      {q:"Is there someone you need to forgive — not for them, but for yourself?",hint:"Forgiveness is freedom"},
+      {q:"What wound in you still opens when something small happens?",hint:"Trace it back"},
+    ]},
+    {id:'reduce-stress',name:'Reduce Stress',desc:'Be your own best support',emoji:'💨',bg:'#08121A',accent:'#06B6D4',hint:'Breathe first',cards:[
+      {q:"What in your life right now is taking up the most mental energy — is it worth it?",hint:"Breathe first"},
+      {q:"What boundary have you been avoiding setting that would immediately reduce your stress?",hint:"You're allowed"},
+      {q:"When you're overwhelmed, what do you actually need — that you rarely give yourself?",hint:"Be kind to you"},
+      {q:"What are you saying yes to that you really want to say no to?",hint:"It's okay to say no"},
+      {q:"If stress had a face, whose face would it have?",hint:"Interesting, right?"},
+    ]},
+    {id:'life-dream',name:'Life and Dream',desc:'What does your ideal life look like?',emoji:'🔮',bg:'#0A0818',accent:'#A78BFA',hint:'Dream without limits',cards:[
+      {q:"If money wasn't a factor, what would your life look like in 5 years?",hint:"Dream without limits"},
+      {q:"What dream have you quietly given up on that still lives in the back of your mind?",hint:"Revive it"},
+      {q:"What does success actually mean to you — not to your parents, not to society?",hint:"Define it yourself"},
+      {q:"What small step could you take this week toward the life you actually want?",hint:"Start now"},
+      {q:"What story are you telling yourself about why you can't have what you really want?",hint:"Challenge it"},
+    ]},
+  ],
+  couple:[
+    {id:'deep-connect',name:'Deep Connection',desc:'Get closer than ever before',emoji:'🔗',bg:'#180A0E',accent:'#F43F5E',hint:'Look them in the eyes',cards:[
+      {q:"What's something about me you've never fully understood but were afraid to ask?",hint:"Ask it now"},
+      {q:"When do you feel most loved by me — and when do you feel most unseen?",hint:"Be honest"},
+      {q:"What moment between us would you relive if you could?",hint:"Close your eyes"},
+      {q:"Is there something you've been wanting to tell me but didn't know how?",hint:"Now's the time"},
+      {q:"What does our relationship give you that nothing else does?",hint:"Name it out loud"},
+    ]},
+    {id:'truth-couple',name:'Truth or Dare',desc:'No filter. No holding back.',emoji:'🎯',bg:'#180C05',accent:'#F97316',hint:'No taking it back',cards:[
+      {q:"What's something I do that drives you absolutely crazy — that you've never told me?",hint:"Say it with your chest"},
+      {q:"When did you last feel like you were putting in more effort than me?",hint:"The effort gap"},
+      {q:"Have you ever lied to me to avoid an argument? When?",hint:"Receipts please"},
+      {q:"What's something about your past that you've never told me?",hint:"The vault opens"},
+      {q:"What's the closest you've ever come to walking away from us?",hint:"The hardest one"},
+    ]},
+    {id:'future-us',name:'Future Us',desc:'Dream together about what\'s next',emoji:'🌟',bg:'#081808',accent:'#22C55E',hint:'Dream out loud',cards:[
+      {q:"What's one thing you want us to build together in the next year?",hint:"Dream out loud"},
+      {q:"Where do you see us in 10 years — be specific, be honest?",hint:"Paint the picture"},
+      {q:"What habit of mine do you hope I grow out of by then?",hint:"Constructive 😂"},
+      {q:"What's something we've never done together that you want to?",hint:"Add it to the list"},
+      {q:"If we could design our perfect life together, what would it look like?",hint:"No limits"},
+    ]},
+    {id:'love-language',name:'Love Language',desc:'How do you really feel loved?',emoji:'💝',bg:'#180510',accent:'#EC4899',hint:'Speak your truth',cards:[
+      {q:"What do I do that makes you feel most loved — even if I don't realise I'm doing it?",hint:"The little things"},
+      {q:"What do you wish I did more of to show you I care?",hint:"A real request"},
+      {q:"When did you last feel truly appreciated by me?",hint:"Think carefully"},
+      {q:"What's something I stopped doing that you miss?",hint:"Be specific"},
+      {q:"How do you know when I'm proud of you — do you always know?",hint:"Do you?"},
+    ]},
+    {id:'hot-seat',name:'Hot Seat',desc:'You\'re in it. Answer everything.',emoji:'🔥',bg:'#180505',accent:'#EF4444',hint:'No skipping',cards:[
+      {q:"What's the pettiest reason you've ever been mad at me?",hint:"We're judging you 😂"},
+      {q:"What's something I said once that stuck with you — and not in a good way?",hint:"Say it"},
+      {q:"When did you last lie to me about how you were feeling?",hint:"We know there's one"},
+      {q:"What do you wish I would stop doing immediately?",hint:"Name it"},
+      {q:"If you could change one thing about us right now, what would it be?",hint:"Be brave"},
+    ]},
+    {id:'memories',name:'Our Memories',desc:'Revisit the moments that matter most',emoji:'📸',bg:'#181405',accent:'#EAB308',hint:'Go back there',cards:[
+      {q:"What's the first moment you knew things between us were different?",hint:"The beginning"},
+      {q:"What memory of us do you think about most when we're apart?",hint:"Name it"},
+      {q:"What's the funniest thing that's ever happened between us?",hint:"Laugh about it"},
+      {q:"When did I surprise you in a way you didn't expect?",hint:"The plot twist"},
+      {q:"What's a moment you wish we'd captured but didn't?",hint:"It still lives somewhere"},
+    ]},
+  ],
+  fun:[
+    {id:'would-you',name:'Would You Rather',desc:'Every option is a disaster. Choose one.',emoji:'🤔',bg:'#181005',accent:'#F59E0B',hint:'No both. Pick one.',cards:[
+      {q:"Would you rather I told you every petty thought I had about you for 24 hours — or kept them all inside forever?",hint:"Both are terrifying"},
+      {q:"Would you rather I forgot your birthday completely OR remembered and said 'oh yeah, happy birthday' at 11:58pm?",hint:"One is worse 😂"},
+      {q:"Would you rather I narrated everything you did like a nature documentary — or gave you a weekly performance review?",hint:"Choose your torture"},
+      {q:"Would you rather find out I have a hidden folder of your worst photos — or that I've shown some to the group chat?",hint:"They exist either way"},
+      {q:"Would you rather I only responded to texts with one word — or left you on read for exactly 3 hours every time?",hint:"Pick your nightmare"},
+    ]},
+    {id:'most-likely',name:'Most Likely To',desc:'Point at each other. No hesitation.',emoji:'👉',bg:'#051808',accent:'#10B981',hint:'Point on 3',cards:[
+      {q:"Who is most likely to still be getting ready when the other is already in the car?",hint:"Point on 3"},
+      {q:"Who is most likely to replay a conversation and get mad about something that hasn't happened yet?",hint:"Pre-offended 😂"},
+      {q:"Who is most likely to say 'I'm not hungry' and then eat half your plate?",hint:"We all know"},
+      {q:"Who is most likely to bring up a 2-year-old argument with perfect detail?",hint:"Date. Time. Outfit."},
+      {q:"Who is most likely to be the real reason this whole dynamic is chaotic?",hint:"Both point 💀"},
+    ]},
+    {id:'hot-takes',name:'Hot Takes',desc:'Unpopular opinions. Say it with your chest.',emoji:'🌶️',bg:'#180505',accent:'#EF4444',hint:'Say it with confidence',cards:[
+      {q:"Give your most controversial opinion about relationships that you'd never say publicly.",hint:"No filter"},
+      {q:"What's something everyone thinks is romantic but you secretly find annoying?",hint:"Hot take loading..."},
+      {q:"What's a relationship green flag that people praise but you think is actually a red flag?",hint:"Controversial but go"},
+      {q:"What's something people say they want in a partner but they actually couldn't handle?",hint:"Facts only"},
+      {q:"What's a piece of relationship advice you think is completely wrong?",hint:"Say it"},
+    ]},
+    {id:'never-have-i',name:'Never Have I Ever',desc:'Find out who\'s been up to what 👀',emoji:'🙈',bg:'#100818',accent:'#8B5CF6',hint:'One finger down if true',cards:[
+      {q:"Never have I ever gone through someone's phone without them knowing.",hint:"One finger down 👀"},
+      {q:"Never have I ever pretended to be asleep to avoid a conversation.",hint:"We see you 😂"},
+      {q:"Never have I ever stayed in a situation longer than I should have.",hint:"Be honest"},
+      {q:"Never have I ever vented about someone and then acted completely normal with them.",hint:"Everyone's done this"},
+      {q:"Never have I ever had feelings for someone I absolutely should not have.",hint:"👀 One finger down"},
+    ]},
+    {id:'this-or-that',name:'This or That',desc:'Lightning round. No overthinking.',emoji:'⚡',bg:'#181205',accent:'#FBBF24',hint:'First instinct. Go.',cards:[
+      {q:"Knowing everything — OR feeling everything deeply?",hint:"First instinct. Go."},
+      {q:"Be loved by many people who barely know you — OR deeply known by just one person?",hint:"No wrong answer"},
+      {q:"Radical honesty in every relationship — OR comfortable white lies that keep the peace?",hint:"Choose your world"},
+      {q:"Never be misunderstood again — OR never feel lonely again?",hint:"Both hurt to lose"},
+      {q:"Know exactly when you'll die — OR know exactly who will betray you?",hint:"💀 Wild one"},
+    ]},
+    {id:'confessions',name:'Confessions',desc:'Say the thing you\'ve been holding back.',emoji:'🤫',bg:'#08081A',accent:'#6366F1',hint:'No judgement',cards:[
+      {q:"Confess something you did that you got away with and never told anyone.",hint:"Statute of limitations expired"},
+      {q:"Confess a thought you've had that you're genuinely ashamed of.",hint:"We're all human"},
+      {q:"Confess something you pretend not to care about — but actually care deeply about.",hint:"Drop the act"},
+      {q:"Confess a version of yourself that only comes out around certain people.",hint:"Which version?"},
+      {q:"Confess one thing you've never said out loud because saying it makes it real.",hint:"Say it. Right now."},
+    ]},
+  ]
+};
+
+// ════════════════════════════════
+// STATE
+// ════════════════════════════════
+let seg='insight', cat=null, deck=[], idx=0;
+let history=[]; // FIX 4: track card history for undo
+let favs=JSON.parse(localStorage.getItem('k_favs')||'[]');
+
+function loadSaved(){
+  try{
+    const s=localStorage.getItem('koino_data');
+    if(s){const d=JSON.parse(s);Object.keys(d).forEach(k=>{if(D[k])D[k]=d[k];});}
+  }catch(e){}
+}
+
+// ════════════════════════════════
+// HOME
+// ════════════════════════════════
+function setSeg(el,s){
+  document.querySelectorAll('.seg').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on'); seg=s; renderCats();
+}
+
+function renderCats(){
+  const el=document.getElementById('cats');
+  const list=D[seg]||[];
+  el.innerHTML=list.map((c,i)=>`
+    <div class="cat" data-seg="${seg}" data-id="${c.id}"
+         style="animation:fi .28s ease ${i*.05}s both">
+      <div class="emo" style="background:${c.bg}">${c.emoji}</div>
+      <div class="cat-info">
+        <div class="cat-name">${c.name}</div>
+        <div class="cat-desc">${c.desc}</div>
+      </div>
+      <div class="chevron">›</div>
+    </div>`).join('');
+
+  // FIX 2: Use tap detection instead of onclick to prevent scroll-triggered opens
+  el.querySelectorAll('.cat').forEach(catEl => {
+    let touchStartY = 0;
+    let touchStartX = 0;
+    let touchMoved = false;
+
+    catEl.addEventListener('touchstart', e => {
+      touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX;
+      touchMoved = false;
+    }, {passive: true});
+
+    catEl.addEventListener('touchmove', e => {
+      const dy = Math.abs(e.touches[0].clientY - touchStartY);
+      const dx = Math.abs(e.touches[0].clientX - touchStartX);
+      if (dy > 8 || dx > 8) touchMoved = true;
+    }, {passive: true});
+
+    catEl.addEventListener('touchend', e => {
+      if (!touchMoved) {
+        e.preventDefault();
+        openCat(catEl.dataset.seg, catEl.dataset.id);
+      }
+    });
+
+    // Keep mouse click for desktop
+    catEl.addEventListener('click', e => {
+      openCat(catEl.dataset.seg, catEl.dataset.id);
+    });
+  });
+}
+
+function openCat(s,id){
+  cat=D[s]?.find(c=>c.id===id);
+  if(!cat)return;
+  if(!cat.cards?.length){showToast('No cards yet — add some in admin 😊');return;}
+  deck=shuf([...cat.cards]); idx=0; history=[];
+  document.getElementById('c-catname').textContent=cat.name;
+  document.getElementById('c-subdesc').textContent=cat.desc;
+  document.getElementById('done-ov').style.display='none';
+  document.getElementById('fav-btn').className='abtn abtn-fav';
+  document.getElementById('fav-btn').textContent='♡';
+  show('cards'); buildStack();
+}
+function goHome(){show('home');}
+
+// ════════════════════════════════
+// CARD STACK
+// ════════════════════════════════
+function buildStack(){
+  const wrap=document.getElementById('stack');
+  wrap.querySelectorAll('.qcard').forEach(c=>c.remove());
+  const tot=deck.length;
+  document.getElementById('c-num').textContent=`${idx+1}/${tot}`;
+  document.getElementById('prog-f').style.width=(idx/tot*100)+'%';
+
+  // Undo button dim if nothing to go back to
+  document.getElementById('undo-btn').style.opacity = history.length > 0 ? '1' : '0.3';
+
+  for(let i=Math.min(2,tot-idx-1);i>=0;i--){
+    const el=makeCard(deck[idx+i]);
+    el.classList.add('c'+i);
+    wrap.appendChild(el);
+  }
+  const top=wrap.querySelector('.qcard.c0');
+  if(top) attachSwipe(top);
+}
+
+function makeCard(card){
+  const el=document.createElement('div');
+  el.className='qcard';
+  el.style.background=`linear-gradient(160deg,${cat.accent}EE 0%,${cat.accent}88 35%,${cat.bg} 75%)`;
+  el.innerHTML=`
+    <div class="qcard-emoji">${cat.emoji}</div>
+    <div class="qcard-q">${card.q||card}</div>
+    <div class="qcard-foot">
+      <div class="qcard-hint">${card.hint||cat.hint||''}</div>
+      <div class="qcard-swipe">SWIPE →</div>
+    </div>`;
+  return el;
+}
+
+function attachSwipe(el){
+  let sx=0,sy=0,dx=0,drag=false;
+  const s=e=>{
+    sx=e.touches?e.touches[0].clientX:e.clientX;
+    sy=e.touches?e.touches[0].clientY:e.clientY;
+    drag=true;el.style.transition='none'
+  };
+  const m=e=>{
+    if(!drag)return;
+    dx=(e.touches?e.touches[0].clientX:e.clientX)-sx;
+    const dy=(e.touches?e.touches[0].clientY:e.clientY)-sy;
+    // Only hijack horizontal swipes, let vertical scroll pass
+    if(Math.abs(dx)>Math.abs(dy)){
+      if(e.cancelable)e.preventDefault();
+      el.style.transform=`translateX(${dx}px) rotate(${dx*.07}deg)`;
+      const l=document.getElementById('si-l'),r=document.getElementById('si-r');
+      if(dx<-30){l.textContent='↩ BACK';l.style.opacity=Math.min(1,(Math.abs(dx)-30)/60)+'';r.style.opacity='0';}
+      else if(dx>30){r.textContent='✓ NEXT';r.style.opacity=Math.min(1,(dx-30)/60)+'';l.style.opacity='0';}
+      else{l.style.opacity='0';r.style.opacity='0';}
+    }
+  };
+  const e2=()=>{
+    if(!drag)return;drag=false;el.style.transition='';
+    document.getElementById('si-l').style.opacity='0';
+    document.getElementById('si-r').style.opacity='0';
+    if(dx<-80)doUndo();           // swipe LEFT = go back
+    else if(dx>80)doSwipe('right'); // swipe RIGHT = advance
+    else el.style.transform='translateX(0) rotate(0)';
+    dx=0;
+  };
+  el.addEventListener('touchstart',s,{passive:true});
+  el.addEventListener('touchmove',m,{passive:false});
+  el.addEventListener('touchend',e2);
+  el.addEventListener('mousedown',s);
+  window.addEventListener('mousemove',m);
+  window.addEventListener('mouseup',e2);
+}
+
+function doSwipe(dir){
+  const wrap=document.getElementById('stack');
+  const top=wrap.querySelector('.qcard.c0');
+  if(!top)return;
+
+  // FIX 4: Save current index to history before advancing
+  history.push(idx);
+
+  top.classList.remove('c0');
+  top.classList.add(dir==='left'?'exit-l':'exit-r');
+  setTimeout(()=>top.remove(),420);
+  idx++;
+  const tot=deck.length;
+  if(idx>=tot){setTimeout(()=>{document.getElementById('done-ov').style.display='flex'},350);document.getElementById('prog-f').style.width='100%';return;}
+  document.getElementById('c-num').textContent=`${idx+1}/${tot}`;
+  document.getElementById('prog-f').style.width=(idx/tot*100)+'%';
+  document.getElementById('undo-btn').style.opacity='1';
+  const c1=wrap.querySelector('.qcard.c1'),c2=wrap.querySelector('.qcard.c2');
+  if(c1){c1.classList.remove('c1');c1.classList.add('c0');attachSwipe(c1);}
+  if(c2){c2.classList.remove('c2');c2.classList.add('c1');}
+  if(idx+2<tot){const nc=makeCard(deck[idx+2]);nc.classList.add('c2');wrap.insertBefore(nc,wrap.querySelector('.qcard'));}
+}
+
+// FIX 4: Proper undo — go back to previous card
+function doUndo(){
+  if(history.length===0){showToast('Already at the first card');return;}
+  idx=history.pop();
+  buildStack();
+  showToast('↩ Going back');
+}
+
+function doFav(){
+  if(!deck[idx])return;
+  const key=deck[idx].q||String(idx);
+  const btn=document.getElementById('fav-btn');
+  if(favs.includes(key)){favs=favs.filter(f=>f!==key);btn.className='abtn abtn-fav';btn.textContent='♡';showToast('Removed');}
+  else{favs.push(key);btn.className='abtn abtn-fav faved';btn.textContent='♥';showToast('Saved ✦');}
+  localStorage.setItem('k_favs',JSON.stringify(favs));
+}
+function doRestart(){deck=shuf([...cat.cards]);idx=0;history=[];document.getElementById('done-ov').style.display='none';buildStack();}
+
+// ════════════════════════════════
+// UTILS
+// ════════════════════════════════
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function shuf(a){for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2000);}
+
+loadSaved();renderCats();
+document.head.insertAdjacentHTML('beforeend','<style>@keyframes fi{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}</style>');
+
+</script>
+</body>
+</html>
