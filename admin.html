@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Koino Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0F0E16;--surface:#1A1828;--surface2:#221F33;--border:rgba(255,255,255,.09);
+  --purple:#8B5CF6;--purple2:#6D28D9;--pink:#EC4899;--green:#34D399;--yellow:#FBBF24;
+  --text:#F2EFE9;--muted:#888;--dim:#555;
+}
+html,body{background:var(--bg);min-height:100vh;font-family:'Outfit',sans-serif;color:var(--text);}
+button{font-family:'Outfit',sans-serif;cursor:pointer;border:none;outline:none;}
+input,textarea,select{font-family:'Outfit',sans-serif;outline:none;}
+
+/* ── LAYOUT ── */
+.app{display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{
+width:260px;flex-shrink:0;
+background:var(–surface);
+border-right:1px solid var(–border);
+display:flex;flex-direction:column;
+position:fixed;top:0;left:0;height:100vh;
+overflow-y:auto;z-index:100;
+transition:transform .3s;
+}
+.sidebar-logo{
+padding:28px 24px 20px;
+font-family:‘Playfair Display’,serif;
+font-size:28px;font-weight:900;
+letter-spacing:-1px;border-bottom:1px solid var(–border);
+}
+.sidebar-logo span{color:var(–purple);}
+.sidebar-section{padding:20px 16px 8px;font-size:10px;letter-spacing:2px;color:var(–dim);font-weight:700;text-transform:uppercase;}
+.nav-item{
+display:flex;align-items:center;gap:12px;
+padding:11px 16px;border-radius:12px;margin:2px 8px;
+font-size:14px;font-weight:500;color:var(–muted);
+cursor:pointer;transition:all .18s;
+}
+.nav-item:hover{background:var(–surface2);color:var(–text);}
+.nav-item.active{background:linear-gradient(135deg,rgba(139,92,246,.2),rgba(109,40,217,.1));color:var(–purple);border:1px solid rgba(139,92,246,.2);}
+.nav-icon{font-size:18px;width:24px;text-align:center;}
+.sidebar-bottom{margin-top:auto;padding:16px;border-top:1px solid var(–border);}
+.export-btn{
+width:100%;padding:12px;border-radius:12px;
+background:linear-gradient(135deg,var(–purple),var(–purple2));
+color:white;font-size:14px;font-weight:700;
+display:flex;align-items:center;justify-content:center;gap:8px;
+box-shadow:0 4px 18px rgba(139,92,246,.4);transition:transform .15s;
+}
+.export-btn:hover{transform:translateY(-1px);}
+
+/* MAIN */
+.main{margin-left:260px;flex:1;padding:0;min-height:100vh;}
+
+/* TOP BAR */
+.topbar{
+padding:24px 32px 20px;
+border-bottom:1px solid var(–border);
+display:flex;align-items:center;justify-content:space-between;
+background:var(–bg);position:sticky;top:0;z-index:50;
+}
+.topbar-title{font-family:‘Playfair Display’,serif;font-size:24px;font-weight:900;}
+.topbar-sub{font-size:13px;color:var(–muted);margin-top:2px;}
+.topbar-actions{display:flex;gap:10px;}
+.btn{
+padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;
+transition:all .15s;display:flex;align-items:center;gap:6px;
+}
+.btn-primary{background:linear-gradient(135deg,var(–purple),var(–purple2));color:white;box-shadow:0 4px 14px rgba(139,92,246,.35);}
+.btn-primary:hover{transform:translateY(-1px);}
+.btn-ghost{background:var(–surface);color:var(–muted);border:1px solid var(–border);}
+.btn-ghost:hover{color:var(–text);border-color:rgba(255,255,255,.2);}
+.btn-danger{background:rgba(239,68,68,.12);color:#EF4444;border:1px solid rgba(239,68,68,.2);}
+.btn-danger:hover{background:rgba(239,68,68,.2);}
+.btn-green{background:rgba(52,211,153,.12);color:var(–green);border:1px solid rgba(52,211,153,.2);}
+
+/* CONTENT */
+.content{padding:28px 32px;max-width:1100px;}
+
+/* STATS ROW */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+.stat-card{background:var(–surface);border:1px solid var(–border);border-radius:16px;padding:20px;}
+.stat-num{font-family:‘DM Mono’,monospace;font-size:32px;font-weight:500;color:var(–purple);}
+.stat-label{font-size:12px;color:var(–muted);margin-top:4px;}
+
+/* SECTION HEADER */
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.section-title{font-family:‘Playfair Display’,serif;font-size:20px;font-weight:700;}
+
+/* TAB MANAGER */
+.tab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:28px;}
+.tab-card{
+background:var(–surface);border:1px solid var(–border);border-radius:14px;
+padding:16px;cursor:pointer;transition:all .18s;position:relative;
+}
+.tab-card:hover{border-color:rgba(139,92,246,.4);transform:translateY(-2px);}
+.tab-card.selected{border-color:var(–purple);background:rgba(139,92,246,.08);}
+.tab-card-emoji{font-size:24px;margin-bottom:8px;}
+.tab-card-name{font-weight:700;font-size:15px;margin-bottom:4px;}
+.tab-card-count{font-size:12px;color:var(–muted);}
+.tab-card-del{position:absolute;top:10px;right:10px;background:rgba(239,68,68,.12);border:none;color:#EF4444;width:24px;height:24px;border-radius:6px;font-size:13px;display:none;align-items:center;justify-content:center;}
+.tab-card:hover .tab-card-del{display:flex;}
+
+/* EDITION LIST */
+.edition-list{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.edition-row{
+background:var(–surface);border:1px solid var(–border);border-radius:14px;
+padding:16px 20px;display:flex;align-items:center;gap:16px;
+}
+.edition-row:hover{border-color:rgba(255,255,255,.15);}
+.edition-emoji{font-size:28px;width:44px;text-align:center;}
+.edition-info{flex:1;}
+.edition-name{font-weight:700;font-size:16px;margin-bottom:3px;}
+.edition-meta{font-size:12px;color:var(–muted);}
+.edition-actions{display:flex;gap:8px;}
+
+/* QUESTION EDITOR */
+.qeditor{background:var(–surface);border:1px solid var(–border);border-radius:16px;margin-bottom:28px;}
+.qeditor-hdr{padding:18px 22px;border-bottom:1px solid var(–border);display:flex;align-items:center;justify-content:space-between;}
+.qeditor-hdr-left{display:flex;align-items:center;gap:12px;}
+.qeditor-title{font-weight:700;font-size:16px;}
+.qeditor-count{font-family:‘DM Mono’,monospace;font-size:11px;color:var(–muted);background:var(–surface2);padding:4px 10px;border-radius:8px;}
+.qlist{padding:16px 22px;display:flex;flex-direction:column;gap:8px;max-height:500px;overflow-y:auto;}
+.qrow{
+display:flex;align-items:flex-start;gap:12px;
+background:var(–surface2);border-radius:10px;padding:12px 14px;
+border:1px solid transparent;transition:border .15s;
+}
+.qrow:hover{border-color:var(–border);}
+.qrow-num{font-family:‘DM Mono’,monospace;font-size:11px;color:var(–dim);width:20px;flex-shrink:0;padding-top:3px;}
+.qrow-body{flex:1;}
+.qrow-q{font-size:14px;font-weight:500;line-height:1.5;margin-bottom:4px;}
+.qrow-hint{font-size:11px;color:var(–muted);font-style:italic;}
+.qrow-actions{display:flex;gap:6px;flex-shrink:0;}
+.icon-btn{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;border:none;transition:all .15s;}
+.icon-btn-edit{background:rgba(139,92,246,.12);color:var(–purple);}
+.icon-btn-del{background:rgba(239,68,68,.1);color:#EF4444;}
+.icon-btn:hover{transform:scale(1.1);}
+
+/* BULK ADD */
+.bulk-area{padding:0 22px 22px;}
+.bulk-label{font-size:12px;font-weight:600;color:var(–muted);margin-bottom:8px;margin-top:16px;letter-spacing:.5px;}
+.bulk-hint{font-size:11px;color:var(–dim);margin-bottom:8px;line-height:1.5;}
+.bulk-ta{
+width:100%;min-height:140px;padding:14px;
+background:var(–bg);border:1px solid var(–border);border-radius:10px;
+color:var(–text);font-size:14px;line-height:1.6;resize:vertical;
+transition:border .2s;
+}
+.bulk-ta:focus{border-color:var(–purple);}
+.bulk-row{display:flex;gap:10px;margin-top:10px;align-items:flex-start;}
+.field-row{display:flex;gap:10px;margin-bottom:10px;}
+.field{flex:1;}
+.field label{display:block;font-size:12px;font-weight:600;color:var(–muted);margin-bottom:6px;letter-spacing:.5px;}
+.field input,.field select,.field textarea{
+width:100%;padding:10px 14px;
+background:var(–bg);border:1px solid var(–border);border-radius:10px;
+color:var(–text);font-size:14px;transition:border .2s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(–purple);}
+.field select option{background:var(–surface);}
+
+/* MODAL */
+.modal-overlay{
+position:fixed;inset:0;background:rgba(0,0,0,.7);
+display:none;align-items:center;justify-content:center;
+z-index:999;backdrop-filter:blur(4px);padding:20px;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+background:var(–surface);border:1px solid var(–border);
+border-radius:20px;padding:28px;width:100%;max-width:540px;
+max-height:90vh;overflow-y:auto;
+}
+.modal-title{font-family:‘Playfair Display’,serif;font-size:22px;font-weight:900;margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(–muted);margin-bottom:22px;}
+.modal-actions{display:flex;gap:10px;margin-top:22px;justify-content:flex-end;}
+
+/* TOAST */
+.toast{
+position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+background:#2A2840;color:var(–text);font-size:13px;font-weight:500;
+padding:10px 22px;border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.4);
+opacity:0;transition:all .3s;z-index:9999;white-space:nowrap;
+border:1px solid rgba(255,255,255,.12);
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* EXPORT PAGE */
+.export-page{padding:28px 32px;max-width:900px;}
+.export-step{
+background:var(–surface);border:1px solid var(–border);border-radius:16px;
+margin-bottom:16px;overflow:hidden;
+}
+.export-step-hdr{
+padding:18px 22px;display:flex;align-items:center;gap:14px;cursor:pointer;
+border-bottom:1px solid transparent;transition:border .2s;
+}
+.export-step-hdr.open{border-bottom-color:var(–border);}
+.step-num{
+width:32px;height:32px;border-radius:50%;
+background:linear-gradient(135deg,var(–purple),var(–purple2));
+display:flex;align-items:center;justify-content:center;
+font-size:14px;font-weight:700;flex-shrink:0;
+}
+.step-title{font-weight:700;font-size:16px;}
+.step-sub{font-size:12px;color:var(–muted);}
+.step-body{padding:20px 22px;display:none;}
+.step-body.open{display:block;}
+.step-body p{font-size:14px;color:var(–muted);line-height:1.7;margin-bottom:12px;}
+.step-body strong{color:var(–text);}
+.code-block{
+background:var(–bg);border:1px solid var(–border);border-radius:10px;
+padding:14px;font-family:‘DM Mono’,monospace;font-size:12px;
+color:#C4B5FD;line-height:1.6;overflow-x:auto;margin:10px 0;
+}
+.highlight{background:rgba(139,92,246,.15);padding:2px 6px;border-radius:4px;color:var(–purple);font-family:‘DM Mono’,monospace;font-size:12px;}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:48px 24px;color:var(–muted);}
+.empty-icon{font-size:48px;margin-bottom:16px;}
+.empty-title{font-size:18px;font-weight:700;color:var(–text);margin-bottom:8px;}
+
+/* MOBILE SIDEBAR TOGGLE */
+.sidebar-toggle{display:none;position:fixed;top:16px;left:16px;z-index:200;background:var(–surface);border:1px solid var(–border);width:40px;height:40px;border-radius:10px;align-items:center;justify-content:center;font-size:18px;cursor:pointer;}
+
+@media(max-width:768px){
+.sidebar{transform:translateX(-100%);}
+.sidebar.open{transform:translateX(0);}
+.main{margin-left:0;}
+.sidebar-toggle{display:flex;}
+.stats{grid-template-columns:repeat(2,1fr);}
+.content,.export-page{padding:20px 16px;}
+.topbar{padding:60px 16px 16px;}
+}
+</style>
+
+</head>
+<body>
+
+<!-- SIDEBAR TOGGLE (mobile) -->
+
+<div class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">☰</div>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">Koino<span>✦</span> <span style="font-size:13px;font-weight:400;color:var(--muted);font-family:'Outfit',sans-serif;"> Admin</span></div>
+
+  <div class="sidebar-section">Content</div>
+  <div class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
+    <span class="nav-icon">📊</span> Dashboard
+  </div>
+  <div class="nav-item" onclick="showPage('categories')" id="nav-categories">
+    <span class="nav-icon">🗂</span> Categories
+  </div>
+  <div class="nav-item" onclick="showPage('editions')" id="nav-editions">
+    <span class="nav-icon">📚</span> Editions
+  </div>
+  <div class="nav-item" onclick="showPage('questions')" id="nav-questions">
+    <span class="nav-icon">💬</span> Questions
+  </div>
+
+  <div class="sidebar-section">Tools</div>
+  <div class="nav-item" onclick="showPage('bulkadd')" id="nav-bulkadd">
+    <span class="nav-icon">⚡</span> Bulk Add
+  </div>
+  <div class="nav-item" onclick="showPage('export')" id="nav-export">
+    <span class="nav-icon">🚀</span> Export to App
+  </div>
+
+  <div class="sidebar-bottom">
+    <button class="export-btn" onclick="exportToApp()">
+      ⬇️ Download App File
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+
+<div class="main">
+
+  <!-- ══ DASHBOARD ══ -->
+
+  <div id="page-dashboard">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Dashboard</div>
+        <div class="topbar-sub">Your Koino content at a glance</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" onclick="showPage('bulkadd')">⚡ Bulk Add Questions</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="stats" id="stats-row"></div>
+
+```
+  <div class="section-hdr">
+    <div class="section-title">Recent Editions</div>
+    <button class="btn btn-ghost" onclick="showPage('editions')">View all →</button>
+  </div>
+  <div id="dashboard-editions"></div>
+</div>
+```
+
+  </div>
+
+  <!-- ══ CATEGORIES ══ -->
+
+  <div id="page-categories" style="display:none">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Categories</div>
+        <div class="topbar-sub">Manage your top-level audience tabs</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" onclick="openNewCategoryModal()">+ New Category</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="tab-grid" id="cat-grid"></div>
+    </div>
+  </div>
+
+  <!-- ══ EDITIONS ══ -->
+
+  <div id="page-editions" style="display:none">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Editions</div>
+        <div class="topbar-sub" id="editions-sub">Select a category to view editions</div>
+      </div>
+      <div class="topbar-actions">
+        <select id="edition-cat-filter" class="btn btn-ghost" style="padding:9px 14px;" onchange="renderEditionPage()">
+          <option value="">All Categories</option>
+        </select>
+        <button class="btn btn-primary" onclick="openNewEditionModal()">+ New Edition</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="edition-list" id="edition-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ QUESTIONS ══ -->
+
+  <div id="page-questions" style="display:none">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Questions</div>
+        <div class="topbar-sub">Edit questions inside any edition</div>
+      </div>
+      <div class="topbar-actions">
+        <select id="q-cat-filter" class="btn btn-ghost" style="padding:9px 14px;" onchange="renderQPage()">
+          <option value="">All Categories</option>
+        </select>
+        <select id="q-ed-filter" class="btn btn-ghost" style="padding:9px 14px;" onchange="renderQPage()">
+          <option value="">All Editions</option>
+        </select>
+      </div>
+    </div>
+    <div class="content">
+      <div id="q-list-wrap"></div>
+    </div>
+  </div>
+
+  <!-- ══ BULK ADD ══ -->
+
+  <div id="page-bulkadd" style="display:none">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">⚡ Bulk Add Questions</div>
+        <div class="topbar-sub">Paste many questions at once — one per line</div>
+      </div>
+    </div>
+    <div class="content" style="max-width:700px;">
+      <div class="qeditor">
+        <div class="qeditor-hdr">
+          <div class="qeditor-title">Paste Questions in Bulk</div>
+        </div>
+        <div class="bulk-area">
+          <div class="field-row" style="margin-top:16px;">
+            <div class="field">
+              <label>CATEGORY</label>
+              <select id="bulk-cat" onchange="populateBulkEdition()">
+                <option value="">Select category...</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>EDITION</label>
+              <select id="bulk-edition">
+                <option value="">Select edition...</option>
+              </select>
+            </div>
+          </div>
+
+```
+      <div class="bulk-label">QUESTIONS (one per line)</div>
+      <div class="bulk-hint">Each line = one question card. You can also add a hint after a pipe | symbol.<br>Example: <span class="highlight">What do you fear most? | Be honest</span></div>
+      <textarea class="bulk-ta" id="bulk-ta" placeholder="What's something you've never told anyone?
+```
+
+When did you last feel truly seen? | Think deeply
+What belief about yourself holds you back the most?
+…”></textarea>
+
+```
+      <div class="field-row" style="margin-top:14px;">
+        <div class="field" style="max-width:280px;">
+          <label>DEFAULT HINT (optional — used if no | hint on line)</label>
+          <input type="text" id="bulk-default-hint" placeholder="e.g. Take your time">
+        </div>
+      </div>
+
+      <div class="bulk-row">
+        <button class="btn btn-primary" onclick="doBulkAdd()" style="flex:1;padding:13px;font-size:15px;">⚡ Add All Questions</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('bulk-ta').value=''">Clear</button>
+      </div>
+
+      <div id="bulk-preview" style="margin-top:16px;"></div>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- ══ EXPORT ══ -->
+
+  <div id="page-export" style="display:none">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">🚀 Export to App</div>
+        <div class="topbar-sub">How to get your changes into the Koino app</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" onclick="exportToApp()">⬇️ Download koino.html</button>
+      </div>
+    </div>
+    <div class="export-page">
+
+```
+  <div style="background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(99,102,241,.08));border:1px solid rgba(139,92,246,.3);border-radius:16px;padding:20px 24px;margin-bottom:24px;">
+    <div style="font-size:20px;font-weight:700;margin-bottom:8px;">How it works ✦</div>
+    <div style="font-size:14px;color:var(--muted);line-height:1.7;">
+      Everything you create here lives in this Admin panel. When you're ready to update the app, you hit <strong style="color:var(--text);">Download koino.html</strong> — and it generates a brand new version of the app with all your questions baked in. You then replace the old file with the new one.
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="export-step">
+    <div class="export-step-hdr open" onclick="toggleStep(this)">
+      <div class="step-num">1</div>
+      <div><div class="step-title">Build your content here in Admin</div><div class="step-sub">Add questions, create editions, bulk paste</div></div>
+    </div>
+    <div class="step-body open">
+      <p>Use the <strong>Bulk Add</strong> or <strong>Editions</strong> pages to add all your questions. You can create as many categories and editions as you want.</p>
+      <p>Nothing is lost when you close this page — all your content is saved automatically in your browser's local storage.</p>
+      <div style="background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--green);">
+        ✅ Your content auto-saves every time you make a change.
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="export-step">
+    <div class="export-step-hdr" onclick="toggleStep(this)">
+      <div class="step-num">2</div>
+      <div><div class="step-title">Click "Download koino.html"</div><div class="step-sub">This generates a complete, updated app file</div></div>
+    </div>
+    <div class="step-body">
+      <p>Click the purple <strong>Download koino.html</strong> button at the top of this page — or in the sidebar bottom.</p>
+      <p>This creates a brand new version of the Koino app file with <strong>all your current questions and editions baked in</strong>. The file downloads to your computer automatically.</p>
+      <div class="code-block">📁 Downloads/<br>  └── koino.html  ← your new app file</div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="export-step">
+    <div class="export-step-hdr" onclick="toggleStep(this)">
+      <div class="step-num">3</div>
+      <div><div class="step-title">Replace the old koino.html with the new one</div><div class="step-sub">Wherever your app is hosted</div></div>
+    </div>
+    <div class="step-body">
+      <p>Depending on where Koino lives, replace the old file:</p>
+      <div class="code-block"># If hosted on a server or cloud hosting:<br>Upload the new koino.html → overwrite the old one<br><br># If using locally / sharing as a file:<br>Just share the new downloaded koino.html</div>
+      <p style="margin-top:12px;">The new file <strong>is the complete app</strong> — no dependencies, no installs. One file does everything.</p>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="export-step">
+    <div class="export-step-hdr" onclick="toggleStep(this)">
+      <div class="step-num">4</div>
+      <div><div class="step-title">Keeping Admin & App in sync</div><div class="step-sub">Important workflow tip</div></div>
+    </div>
+    <div class="step-body">
+      <p><strong>Always edit in Admin, then export.</strong> Don't manually edit the downloaded koino.html — make all changes here, then download a fresh copy.</p>
+      <p>If you open Admin on a new device or browser, your content won't be there (it's saved in browser storage). To back up your data:</p>
+      <button class="btn btn-ghost" onclick="exportJSON()" style="margin-bottom:12px;">📦 Download Content Backup (JSON)</button>
+      <p>Save that JSON file somewhere safe. If you ever need to restore:</p>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <input type="file" id="restore-file" accept=".json" onchange="importJSON(event)" style="display:none">
+        <button class="btn btn-ghost" onclick="document.getElementById('restore-file').click()">📂 Restore from Backup (JSON)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="export-step">
+    <div class="export-step-hdr" onclick="toggleStep(this)">
+      <div class="step-num">5</div>
+      <div><div class="step-title">Hosting options (if you want a real URL)</div><div class="step-sub">Share Koino as a web link</div></div>
+    </div>
+    <div class="step-body">
+      <p>Since Koino is a single HTML file, it's incredibly easy to host. Here are free options:</p>
+      <div class="code-block">
+        <strong>Netlify Drop (easiest — 30 seconds):</strong><br>
+        1. Go to app.netlify.com/drop<br>
+        2. Drag & drop your koino.html file<br>
+        3. You get a live URL instantly ✓<br><br>
+        <strong>GitHub Pages (free):</strong><br>
+        1. Create a GitHub repo<br>
+        2. Upload koino.html as index.html<br>
+        3. Enable Pages in Settings → Pages<br><br>
+        <strong>Vercel / Cloudflare Pages:</strong><br>
+        Same idea — upload the file, get a URL.
+      </div>
+      <p>Every time you update, just re-upload the new file and the URL stays the same.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:24px;text-align:center;">
+    <button class="btn btn-primary" onclick="exportToApp()" style="padding:14px 32px;font-size:16px;">⬇️ Download koino.html Now</button>
+  </div>
+
+</div>
+```
+
+  </div>
+
+</div><!-- /main -->
+
+<!-- ══ MODALS ══ -->
+
+<!-- New Category Modal -->
+
+<div class="modal-overlay" id="modal-category">
+  <div class="modal">
+    <div class="modal-title">New Category</div>
+    <div class="modal-sub">A category is a top-level audience tab (e.g. Marriage, Parenting)</div>
+    <div class="field-row">
+      <div class="field" style="max-width:80px;">
+        <label>EMOJI</label>
+        <input type="text" id="new-cat-emoji" placeholder="💍" maxlength="4">
+      </div>
+      <div class="field">
+        <label>NAME</label>
+        <input type="text" id="new-cat-name" placeholder="e.g. Marriage">
+      </div>
+    </div>
+    <div class="field">
+      <label>HOOK LINE (shown at top when this tab is selected)</label>
+      <input type="text" id="new-cat-hook" placeholder="Before you assume your marriage is healthy — explore these.">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-category')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewCategory()">Create Category</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Edition Modal -->
+
+<div class="modal-overlay" id="modal-edition">
+  <div class="modal">
+    <div class="modal-title" id="modal-edition-title">New Edition</div>
+    <div class="modal-sub">An edition is a card deck inside a category</div>
+    <div class="field-row">
+      <div class="field" style="max-width:80px;">
+        <label>EMOJI</label>
+        <input type="text" id="new-ed-emoji" placeholder="💍" maxlength="4">
+      </div>
+      <div class="field">
+        <label>EDITION NAME</label>
+        <input type="text" id="new-ed-name" placeholder="e.g. Renewal Questions">
+      </div>
+    </div>
+    <div class="field">
+      <label>DESCRIPTION (shown under the edition name)</label>
+      <input type="text" id="new-ed-desc" placeholder="e.g. Before you assume love just fades — ask these tonight.">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>CATEGORY</label>
+        <select id="new-ed-cat">
+          <option value="">Select...</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>DEFAULT HINT</label>
+        <input type="text" id="new-ed-hint" placeholder="e.g. Take your time">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>CARD BG COLOR</label>
+        <input type="color" id="new-ed-bg" value="#0E0B18" style="height:42px;padding:4px;">
+      </div>
+      <div class="field">
+        <label>CARD ACCENT COLOR</label>
+        <input type="color" id="new-ed-accent" value="#8B5CF6" style="height:42px;padding:4px;">
+      </div>
+    </div>
+    <input type="hidden" id="edit-ed-id">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-edition')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdition()">Save Edition</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Question Modal -->
+
+<div class="modal-overlay" id="modal-question">
+  <div class="modal">
+    <div class="modal-title">Edit Question</div>
+    <div class="modal-sub">Update the question text and hint</div>
+    <div class="field" style="margin-bottom:14px;">
+      <label>QUESTION</label>
+      <textarea id="edit-q-text" style="width:100%;min-height:100px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;line-height:1.6;resize:vertical;"></textarea>
+    </div>
+    <div class="field">
+      <label>HINT</label>
+      <input type="text" id="edit-q-hint" placeholder="e.g. Take your time">
+    </div>
+    <input type="hidden" id="edit-q-cat">
+    <input type="hidden" id="edit-q-edition">
+    <input type="hidden" id="edit-q-idx">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-question')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditQuestion()">Save Question</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// DEFAULT DATA (matches koino.html exactly)
+// ══════════════════════════════════════════════════════
+const DEFAULT_TABS = [
+  { id: 'marriage',    label: 'Marriage',      emoji: '💍', hook: "Before you assume your marriage is healthy — explore these." },
+  { id: 'courtship',  label: 'Courtship',     emoji: '🌹', hook: "Before you assume they're the one — ask them this tonight." },
+  { id: 'couples',    label: 'Couples',        emoji: '🔗', hook: "Before you assume \"we're okay\" — open one of these." },
+  { id: 'longdist',   label: 'Long Distance',  emoji: '📱', hook: "Before you assume distance is just distance — talk tonight." },
+  { id: 'parenting',  label: 'Parenting',      emoji: '👶', hook: "Before you assume they're fine — ask your child tonight." },
+  { id: 'singles',    label: 'Singles',        emoji: '🌙', hook: "Before you assume you're ready — ask yourself this first." },
+  { id: 'therapy',    label: 'Therapy',        emoji: '💬', hook: "Before you assume silence is peace — go deeper together." },
+  { id: 'latenights', label: 'Late Nights',    emoji: '🕯', hook: "It's late. The walls are down. Say the real thing." },
+  { id: 'fun',        label: 'Fun',            emoji: '🎯', hook: "No filter. No holding back. Choose one." },
+];
+
+const DEFAULT_D = {
+  marriage: [
+    { id:'marriage-pulse', name:'Marriage Pulse', emoji:'💍', desc:'Ask your spouse these before you assume everything is fine.', bg:'#0E0B18', accent:'#7C3AED', hint:'No assumptions tonight', cards:[
+      {q:"When did you last feel genuinely seen by me — not just heard, but truly seen?", hint:"Think carefully"},
+      {q:"Is there something you've been carrying in this marriage that you've never said out loud?", hint:"Say it tonight"},
+      {q:"What's one thing you wish I understood about what you go through daily?", hint:"No defence tonight"},
+      {q:"When you imagine our marriage in 10 years, what do you most hope hasn't changed?", hint:"Paint the picture"},
+      {q:"What's a part of yourself you feel you've had to shrink in this marriage?", hint:"Be brave"},
+      {q:"When did you last feel proud of us — not just of me or you, but of US?", hint:"Name the moment"},
+      {q:"What do I do that makes you feel like you're alone even when I'm right there?", hint:"This one's heavy"},
+    ]},
+    { id:'marriage-renewal', name:'Renewal Questions', emoji:'🔄', desc:'Before you assume love just fades — ask these 5 tonight.', bg:'#0A0C18', accent:'#6366F1', hint:'Love can be new again', cards:[
+      {q:"What version of us do you miss the most?", hint:"Go back there"},
+      {q:"What's one small thing I used to do that made you feel deeply loved — that I've stopped doing?", hint:"Be specific"},
+      {q:"If we could restart this marriage fresh with everything we know now — would you choose me again?", hint:"Answer honestly"},
+      {q:"What's one dream we had together that got buried under routine?", hint:"Revive it"},
+      {q:"What would it take for this season of our marriage to become your favourite?", hint:"Build it together"},
+      {q:"When was the last time we talked about something that wasn't logistics or the kids?", hint:"Notice the gap"},
+      {q:"What do you need from me right now that you haven't asked for?", hint:"Ask for it"},
+    ]},
+    { id:'marriage-conflict', name:'Conflict & Repair', emoji:'🌊', desc:'5 uncomfortable but healthy questions to ask your spouse tonight.', bg:'#180A10', accent:'#EC4899', hint:'Repair starts here', cards:[
+      {q:"Is there something I said during our last argument that still hasn't left you?", hint:"It's still there"},
+      {q:"When we fight, do you feel like I'm trying to win — or trying to understand you?", hint:"Honest answer only"},
+      {q:"What pattern in our conflict do you wish we could finally break?", hint:"Name it"},
+      {q:"Is there a version of an apology from me that you've been waiting for?", hint:"Give it tonight"},
+      {q:"When you shut down during disagreements, what are you actually feeling?", hint:"Translate the silence"},
+      {q:"What's a wound between us that we've covered with 'I'm fine' but never really healed?", hint:"Trace it back"},
+    ]},
+    { id:'marriage-vision', name:'"Why We\'re Here" Questions', emoji:'🔮', desc:'Ask your spouse these — and watch vision pull you closer.', bg:'#080C18', accent:'#06B6D4', hint:'Dream together', cards:[
+      {q:"What do you believe is the purpose of our marriage beyond just being together?", hint:"Go deep"},
+      {q:"What kind of legacy do you want us to leave for our children or the people around us?", hint:"Think bigger"},
+      {q:"Is there something God has been speaking to you about us lately?", hint:"Share it"},
+      {q:"What would a fully aligned marriage between us actually look like day to day?", hint:"Be specific"},
+      {q:"Are we building toward something — or just managing what we have?", hint:"Honest check"},
+      {q:"What would you need to finally fully surrender into this marriage?", hint:"Say it out loud"},
+    ]},
+  ],
+  courtship: [
+    { id:'courtship-core', name:'Before You Say Yes', emoji:'💎', desc:'5 questions to ask your fiancée/fiancé on your next call tonight.', bg:'#120A18', accent:'#8B5CF6', hint:'Know before you commit', cards:[
+      {q:"How do you handle conflict when you believe you're right and I disagree?", hint:"Watch closely"},
+      {q:"What does submission and leadership look like practically in a home you'd build?", hint:"Theology matters here"},
+      {q:"What are you still healing from that could affect how you show up as a partner?", hint:"Wounds we carry"},
+      {q:"What's your relationship with money — how do you save, spend, and give?", hint:"The real talk"},
+      {q:"What do you need from a partner to feel truly safe?", hint:"Name your needs"},
+      {q:"Have you ever walked away from a relationship you should have stayed in — or stayed in one you should have left?", hint:"The pattern check"},
+      {q:"What does a healthy home feel like to you — what did you see growing up, and what do you want to do differently?", hint:"Origin shapes destination"},
+    ]},
+    { id:'courtship-character', name:'Character Check', emoji:'🎯', desc:'These 5 questions will help you uncover how they handle correction and conflict.', bg:'#180C05', accent:'#F97316', hint:'Character over chemistry', cards:[
+      {q:"When someone corrects you publicly, how do you respond — and how do you feel privately?", hint:"Ego check"},
+      {q:"Tell me about a time you were completely wrong. How did you handle it?", hint:"Accountability matters"},
+      {q:"Who speaks into your life right now — who can tell you hard truths?", hint:"Do they have community?"},
+      {q:"What's a value you have that you would not compromise for love?", hint:"The non-negotiables"},
+      {q:"How do you respond when life gets hard — do you isolate, explode, or reach out?", hint:"Pressure reveals"},
+      {q:"What does your closest friend say is your biggest blind spot?", hint:"Others see what we hide"},
+    ]},
+    { id:'courtship-future', name:'Future Home', emoji:'🏡', desc:"Before you assume you're building the same life — ask these first.", bg:'#081808', accent:'#22C55E', hint:'Align before you commit', cards:[
+      {q:"How many children do you want — and what if we couldn't have biological children?", hint:"Real talk"},
+      {q:"Where do you see us living, and how flexible are you if life requires change?", hint:"Roots vs. wings"},
+      {q:"How do you see us handling extended family — how much access and influence?", hint:"Boundaries matter"},
+      {q:"What does a healthy work-life balance look like for our home?", hint:"Build it intentionally"},
+      {q:"What does spiritual leadership in our home look like to you, practically?", hint:"Speak your vision"},
+      {q:"What's something you've watched other couples do that you never want us to do?", hint:"Learn from what you've seen"},
+    ]},
+  ],
+  couples: [
+    { id:'couples-connect', name:'Deep Connection', emoji:'🔗', desc:'Get closer than ever before.', bg:'#180A0E', accent:'#F43F5E', hint:'Look them in the eyes', cards:[
+      {q:"What's something about me you've never fully understood but were afraid to ask?", hint:"Ask it now"},
+      {q:"When do you feel most loved by me — and when do you feel most unseen?", hint:"Be honest"},
+      {q:"What moment between us would you relive if you could?", hint:"Close your eyes"},
+      {q:"Is there something you've been wanting to tell me but didn't know how?", hint:"Now's the time"},
+      {q:"What does this relationship give you that nothing else does?", hint:"Name it out loud"},
+      {q:"What's a version of me you fell in love with that you miss?", hint:"The real one"},
+    ]},
+    { id:'couples-hotseat', name:'Hot Seat', emoji:'🔥', desc:"You're in it. Answer everything.", bg:'#180505', accent:'#EF4444', hint:'No skipping', cards:[
+      {q:"What's the pettiest reason you've ever been mad at me?", hint:"We're judging you 😂"},
+      {q:"What's something I said once that stuck with you — and not in a good way?", hint:"Say it"},
+      {q:"When did you last lie to me about how you were feeling?", hint:"We know there's one"},
+      {q:"What do you wish I would stop doing immediately?", hint:"Name it"},
+      {q:"If you could change one thing about us right now, what would it be?", hint:"Be brave"},
+      {q:"What's something I do that you've been tolerating rather than actually being okay with?", hint:"Say it with love"},
+    ]},
+    { id:'couples-lovelang', name:'Love Language', emoji:'💝', desc:'How do you really feel loved?', bg:'#180510', accent:'#EC4899', hint:'Speak your truth', cards:[
+      {q:"What do I do that makes you feel most loved — even if I don't realise I'm doing it?", hint:"The little things"},
+      {q:"What do you wish I did more of to show you I care?", hint:"A real request"},
+      {q:"When did you last feel truly appreciated by me?", hint:"Think carefully"},
+      {q:"What's something I stopped doing that you miss?", hint:"Be specific"},
+      {q:"How do you know when I'm proud of you — do you always feel it?", hint:"Do you?"},
+      {q:"What's one act of love that would mean everything to you right now?", hint:"Ask for it"},
+    ]},
+    { id:'couples-memories', name:'Our Memories', emoji:'📸', desc:'Revisit the moments that matter most.', bg:'#181405', accent:'#EAB308', hint:'Go back there', cards:[
+      {q:"What's the first moment you knew things between us were different?", hint:"The beginning"},
+      {q:"What memory of us do you think about most when we're apart?", hint:"Name it"},
+      {q:"What's the funniest thing that's ever happened between us?", hint:"Laugh about it"},
+      {q:"When did I surprise you in a way you didn't expect?", hint:"The plot twist"},
+      {q:"What's a moment you wish we'd captured but didn't?", hint:"It still lives somewhere"},
+      {q:"What story about us do you love telling people?", hint:"Tell it again"},
+    ]},
+  ],
+  longdist: [
+    { id:'longdist-call', name:"Tonight's Call", emoji:'📱', desc:'5 questions to ask on your next call tonight.', bg:'#080C18', accent:'#6366F1', hint:'Make the distance disappear', cards:[
+      {q:"What happened today that you wanted to tell me immediately?", hint:"The small things matter"},
+      {q:"What's the hardest part of missing me that you don't always say?", hint:"Say it tonight"},
+      {q:"What do you do when you're lonely and I'm not available?", hint:"Know each other's coping"},
+      {q:"Is there anything you've been overthinking about us that you haven't mentioned?", hint:"Say it out loud"},
+      {q:"What's one thing you'd do the moment we're in the same room again?", hint:"Picture it"},
+      {q:"When you imagine our life when the distance is finally over, what do you see?", hint:"Hold that vision"},
+    ]},
+    { id:'longdist-trust', name:'Trust & Distance', emoji:'🔐', desc:"Before you assume silence means something — ask this tonight.", bg:'#0A1208', accent:'#22C55E', hint:'Trust is built in the gaps', cards:[
+      {q:"What does loyalty look like to you when we're apart?", hint:"Define it together"},
+      {q:"Is there a fear about distance that you've been carrying alone?", hint:"Share the weight"},
+      {q:"What keeps you committed when the physical connection isn't there?", hint:"The anchor"},
+      {q:"When I go quiet, what do you assume — and is that fair to us?", hint:"Name the story"},
+      {q:"What would make you feel more secure in what we have?", hint:"Ask for what you need"},
+      {q:"How do you celebrate us when we're not physically together?", hint:"Intentionality counts"},
+    ]},
+  ],
+  parenting: [
+    { id:'parenting-heart', name:"Your Child's Heart", emoji:'❤️', desc:"Before you assume they're too young to understand — ask these tonight.", bg:'#180A0E', accent:'#F43F5E', hint:"They feel more than they say", cards:[
+      {q:"What's something that happened at school this week that made you feel alone?", hint:"Listen, don't fix"},
+      {q:"Is there anything that happened at home that made you feel sad or confused?", hint:"Safe space"},
+      {q:"What's something you wish I said to you more often?", hint:"Hear this"},
+      {q:"When do you feel like I'm proud of you — do you know?", hint:"They need to feel it"},
+      {q:"What's something you've been thinking about that you were scared to tell me?", hint:"Open the door"},
+      {q:"Is there anything you feel like you can't be honest with me about? What would make it easier?", hint:"No judgment"},
+      {q:"When you picture home, does it feel safe and warm — or does something feel heavy?", hint:"The real question"},
+    ]},
+    { id:'parenting-smile', name:'Behind The Smile', emoji:'🎭', desc:'Your child may be smiling but hiding pain — ask these 5 tonight.', bg:'#080C18', accent:'#818CF8', hint:'The smile can be a mask', cards:[
+      {q:"Is there something that's been bothering you that you've been pretending is fine?", hint:"Give them permission"},
+      {q:"Who at school actually makes you feel good about yourself?", hint:"Know their world"},
+      {q:"Is there anything you've seen or heard recently that confused or scared you?", hint:"They absorb everything"},
+      {q:"Do you ever feel like you have to be perfect around me? Why?", hint:"This one might sting"},
+      {q:"What's something you've been carrying by yourself that you wish you didn't have to?", hint:"Share the weight"},
+      {q:"When you're really upset, what do you wish I would do?", hint:"Learn their language"},
+    ]},
+    { id:'parenting-words', name:'How Your Words Land', emoji:'💬', desc:"Before you assume your words don't matter — ask your kids how they land.", bg:'#120818', accent:'#A78BFA', hint:'Words build or break', cards:[
+      {q:"Is there something I say a lot that makes you feel bad, even if I don't mean it that way?", hint:"Be open to hearing this"},
+      {q:"When I raise my voice, how does it make you feel inside?", hint:"Their answer matters"},
+      {q:"What's something I've said that you still think about — that felt really good to hear?", hint:"Double down on that"},
+      {q:"Do you feel like I listen when you talk — or does it feel like I'm waiting to respond?", hint:"Listen to this answer"},
+      {q:"What would you want me to say to you on a hard day?", hint:"Learn their love language"},
+      {q:"Is there a label I use for you — even jokingly — that you don't actually like?", hint:"Words stick"},
+    ]},
+    { id:'parenting-legacy', name:'Love or Pressure?', emoji:'🌱', desc:"Before you assume you're nothing like your parents — ask your kids this.", bg:'#080C0A', accent:'#34D399', hint:'Legacy lives in the little things', cards:[
+      {q:"Do you feel like I love you for who you are — or for what you achieve?", hint:"Sit with this"},
+      {q:"When you fail at something, what do you expect from me?", hint:"Know what they fear"},
+      {q:"Do you feel pressure to make me happy? What does that look like for you?", hint:"They'll tell you the truth"},
+      {q:"What do you love doing that you're afraid to tell me about because of my reaction?", hint:"Make room for their dream"},
+      {q:"Do you feel like home is a place you can fully be yourself?", hint:"This is the goal"},
+      {q:"What's something you want me to be proud of you for that I've never noticed?", hint:"See them fully"},
+    ]},
+  ],
+  singles: [
+    { id:'singles-self', name:"Before You Assume You're Ready", emoji:'🪞', desc:'Ask yourself these before you step into your next relationship.', bg:'#120A18', accent:'#8B5CF6', hint:'Know yourself first', cards:[
+      {q:"What patterns have appeared in every relationship you've had — that were actually about you?", hint:"Ownership"},
+      {q:"What does emotional safety actually feel like to you — can you describe it?", hint:"Know what you're seeking"},
+      {q:"What wound do you keep bringing into new situations hoping someone will heal?", hint:"Only you can do this"},
+      {q:"What are you actually afraid of finding if you sit in silence long enough?", hint:"Go there"},
+      {q:"What version of yourself are you in a relationship — vs. who you are alone?", hint:"The gap is the work"},
+      {q:"What do you need to fully heal before you're actually available to love someone?", hint:"Be honest"},
+      {q:"What's the story you're telling yourself about why you're still single — is it true?", hint:"Challenge the narrative"},
+    ]},
+    { id:'singles-healing', name:'Healing Heart', emoji:'💗', desc:'Questions to ask yourself on the road to wholeness.', bg:'#180A10', accent:'#EC4899', hint:'Healing is not linear', cards:[
+      {q:"What are you still carrying from your last relationship that you pretend you're over?", hint:"Be real with yourself"},
+      {q:"When did you last forgive yourself for a choice you made in love? Did you fully mean it?", hint:"Self-forgiveness matters"},
+      {q:"What do you need to hear right now that nobody has said to you?", hint:"Say it to yourself"},
+      {q:"Is there someone you need to forgive — not for them, but for you?", hint:"Forgiveness is freedom"},
+      {q:"What wound in you still opens when something small happens?", hint:"Trace it back"},
+      {q:"What are you healing from that you haven't given yourself full permission to grieve?", hint:"Grieve it"},
+    ]},
+    { id:'singles-dream', name:'Life & Dream', emoji:'🔮', desc:'What does your ideal life actually look like?', bg:'#0A0818', accent:'#A78BFA', hint:'Dream without limits', cards:[
+      {q:"If money wasn't a factor, what would your life look like in 5 years?", hint:"Dream without limits"},
+      {q:"What dream have you quietly given up on that still lives in the back of your mind?", hint:"Revive it"},
+      {q:"What does success actually mean to you — not to your parents, not to society?", hint:"Define it yourself"},
+      {q:"What small step could you take this week toward the life you actually want?", hint:"Start now"},
+      {q:"What story are you telling yourself about why you can't have what you really want?", hint:"Challenge it"},
+      {q:"What does the version of yourself you're most proud of look like?", hint:"Become them"},
+    ]},
+    { id:'singles-latenight', name:'Late Night Thoughts', emoji:'🌙', desc:"The thoughts that keep you up — say them out loud.", bg:'#0A0C18', accent:'#818CF8', hint:'3am energy only', cards:[
+      {q:"What thought keeps you up at night that you've never told anyone?", hint:"3am energy only"},
+      {q:"What do you wish someone would just ask you about?", hint:"Someone's listening now"},
+      {q:"Is there something you've been overthinking that you need to just say out loud?", hint:"Say it. Right now."},
+      {q:"What feeling have you been avoiding dealing with lately?", hint:"Name it to tame it"},
+      {q:"What's something you know you need to change but keep delaying?", hint:"No more delays"},
+      {q:"What does loneliness feel like for you specifically — and when does it hit hardest?", hint:"Describe it"},
+    ]},
+  ],
+  therapy: [
+    { id:'therapy-gentle', name:'Gentle Bonding', emoji:'🌿', desc:'5 gentle bonding & healing questions to ask your partner tonight.', bg:'#080C0A', accent:'#34D399', hint:'Slow down and go deeper', cards:[
+      {q:"What's something from your childhood that still shows up in how you love people?", hint:"Origins matter"},
+      {q:"When did you learn that love had conditions — and how did that shape you?", hint:"The root question"},
+      {q:"What do you do when you feel emotionally overwhelmed that you've never explained to me?", hint:"Help me understand you"},
+      {q:"What's an emotion you struggle to express — and what gets in the way?", hint:"Name the block"},
+      {q:"What does it feel like when you feel truly safe with someone?", hint:"Describe it to me"},
+      {q:"What part of yourself do you feel most misunderstood about?", hint:"I want to understand"},
+    ]},
+    { id:'therapy-stress', name:'Stress & Peace', emoji:'💨', desc:"Before you assume they're fine — ask what's really going on.", bg:'#08121A', accent:'#06B6D4', hint:'Breathe first', cards:[
+      {q:"What in your life right now is taking up the most mental energy — and is it worth it?", hint:"Breathe first"},
+      {q:"What boundary have you been avoiding setting that would immediately bring you peace?", hint:"You're allowed"},
+      {q:"When you're overwhelmed, what do you actually need — that you rarely give yourself?", hint:"Be kind to you"},
+      {q:"What are you saying yes to that you really want to say no to?", hint:"It's okay to say no"},
+      {q:"Where in your body do you hold your stress — and what does it feel like?", hint:"Become body-aware"},
+      {q:"What would it feel like to let go of the one thing you've been holding tightest?", hint:"Imagine it"},
+    ]},
+    { id:'therapy-attachment', name:'Attachment & Love', emoji:'🧬', desc:'Understand how you love and why you love the way you do.', bg:'#180A10', accent:'#F472B6', hint:'Patterns can be healed', cards:[
+      {q:"When I go quiet or distant, what does your body immediately tell you — what do you fear?", hint:"Attachment wound"},
+      {q:"Do you feel more comfortable giving love or receiving it — and why?", hint:"The imbalance check"},
+      {q:"When you were young, what did you have to do to feel safe or loved at home?", hint:"This shaped everything"},
+      {q:"Do you feel like you have to earn love, or do you believe you're worthy of it simply as you are?", hint:"The deepest question"},
+      {q:"What's the most loving thing someone has ever done for you — that cost them nothing?", hint:"Small things, big impact"},
+      {q:"What does abandonment feel like to you — what triggers it?", hint:"Know your trigger"},
+    ]},
+  ],
+  latenights: [
+    { id:'latenights-real', name:'Say The Real Thing', emoji:'🕯', desc:"It's late. The walls are down. Say what you've been holding.", bg:'#0A0818', accent:'#A78BFA', hint:'No filter after midnight', cards:[
+      {q:"What's a fear you've been carrying that you've been too proud to admit?", hint:"Pride costs too much"},
+      {q:"What's the most honest thing you could say about how you're actually doing?", hint:"No 'I'm fine' here"},
+      {q:"Is there something you're grieving right now that nobody knows about?", hint:"Grief needs a witness"},
+      {q:"What's a feeling you've been numbing that deserves to be felt?", hint:"Let it surface"},
+      {q:"What would you say to the person you were 5 years ago?", hint:"Wisdom earned"},
+      {q:"What do you wish you could say to someone — but can't?", hint:"Say it here instead"},
+      {q:"What's something beautiful that's happened in your life recently that you haven't celebrated?", hint:"Celebrate it now"},
+    ]},
+    { id:'latenights-god', name:'Faith & Soul', emoji:'✨', desc:"Questions for the soul. Go deeper than you've gone before.", bg:'#08060E', accent:'#818CF8', hint:'Your soul has something to say', cards:[
+      {q:"Where do you feel like God has been silent lately — and how has that affected you?", hint:"Be honest with faith"},
+      {q:"What's something you've been praying about that you've almost given up on?", hint:"Keep the faith"},
+      {q:"What do you feel like God is trying to teach you through this season?", hint:"Listen deeper"},
+      {q:"Is there something you feel called to that you've been afraid to say out loud?", hint:"Say it"},
+      {q:"What would surrendering control of the one thing you're holding tightest actually look like?", hint:"Real surrender"},
+      {q:"When did you last feel spiritually alive — and what was different then?", hint:"Go back"},
+    ]},
+  ],
+  fun: [
+    { id:'fun-wouldyou', name:'Would You Rather', emoji:'🤔', desc:'Every option is a disaster. You must pick one.', bg:'#181005', accent:'#F59E0B', hint:'No both. Pick one.', cards:[
+      {q:"Would you rather I told you every petty thought I had about you for 24 hours — or kept them all inside forever?", hint:"Both are terrifying"},
+      {q:"Would you rather I forgot your birthday completely OR remembered and said 'oh yeah, happy birthday' at 11:58pm?", hint:"One is worse 😂"},
+      {q:"Would you rather I narrated everything you did like a nature documentary — or gave you a weekly performance review?", hint:"Choose your torture"},
+      {q:"Would you rather find out I have a hidden folder of your worst photos — or that I've shown some to the group chat?", hint:"They exist either way"},
+      {q:"Would you rather I only responded to texts with one word — or left you on read for exactly 3 hours every time?", hint:"Pick your nightmare"},
+      {q:"Would you rather I cried at every single argument — or never showed any emotion at all?", hint:"Chaos either way"},
+    ]},
+    { id:'fun-mostlikely', name:'Most Likely To', emoji:'👉', desc:'Point at each other. No hesitation.', bg:'#051808', accent:'#10B981', hint:'Point on 3', cards:[
+      {q:"Who is most likely to still be getting ready when the other is already in the car?", hint:"Point on 3"},
+      {q:"Who is most likely to replay a conversation and get mad about something that hasn't happened yet?", hint:"Pre-offended 😂"},
+      {q:"Who is most likely to say 'I'm not hungry' and then eat half your plate?", hint:"We all know"},
+      {q:"Who is most likely to bring up a 2-year-old argument with perfect detail?", hint:"Date. Time. Outfit."},
+      {q:"Who is most likely to be the real reason this whole dynamic is chaotic?", hint:"Both point 💀"},
+      {q:"Who is most likely to apologise for something that was clearly not their fault — just to end the argument?", hint:"Be honest"},
+    ]},
+    { id:'fun-hottakes', name:'Hot Takes', emoji:'🌶️', desc:'Unpopular opinions. Say it with your chest.', bg:'#180505', accent:'#EF4444', hint:'Say it with confidence', cards:[
+      {q:"Give your most controversial opinion about relationships that you'd never say publicly.", hint:"No filter"},
+      {q:"What's something everyone thinks is romantic but you secretly find annoying?", hint:"Hot take loading..."},
+      {q:"What's a relationship green flag that people praise but you think is actually a red flag?", hint:"Controversial but go"},
+      {q:"What's something people say they want in a partner but they actually couldn't handle?", hint:"Facts only"},
+      {q:"What's a piece of relationship advice you think is completely wrong?", hint:"Say it"},
+      {q:"What's the most overrated relationship milestone that people make way too big a deal about?", hint:"Trigger someone 😂"},
+    ]},
+    { id:'fun-neverihave', name:'Never Have I Ever', emoji:'🙈', desc:"Find out who's been up to what 👀", bg:'#100818', accent:'#8B5CF6', hint:'One finger down if true', cards:[
+      {q:"Never have I ever gone through someone's phone without them knowing.", hint:"One finger down 👀"},
+      {q:"Never have I ever pretended to be asleep to avoid a conversation.", hint:"We see you 😂"},
+      {q:"Never have I ever stayed in a situation longer than I should have.", hint:"Be honest"},
+      {q:"Never have I ever vented about someone and then acted completely normal with them.", hint:"Everyone's done this"},
+      {q:"Never have I ever had feelings for someone I absolutely should not have.", hint:"👀 One finger down"},
+      {q:"Never have I ever said 'I'm not mad' when I was absolutely furious.", hint:"Classic 😂"},
+    ]},
+    { id:'fun-thisorthat', name:'This or That', emoji:'⚡', desc:'Lightning round. No overthinking.', bg:'#181205', accent:'#FBBF24', hint:'First instinct. Go.', cards:[
+      {q:"Knowing everything — OR feeling everything deeply?", hint:"First instinct. Go."},
+      {q:"Be loved by many people who barely know you — OR deeply known by just one person?", hint:"No wrong answer"},
+      {q:"Radical honesty in every relationship — OR comfortable white lies that keep the peace?", hint:"Choose your world"},
+      {q:"Never be misunderstood again — OR never feel lonely again?", hint:"Both hurt to lose"},
+      {q:"Know exactly when you'll die — OR know exactly who will betray you?", hint:"💀 Wild one"},
+      {q:"A relationship that's deeply passionate but unstable — OR calm and steady but never electric?", hint:"The real one"},
+    ]},
+    { id:'fun-confessions', name:'Confessions', emoji:'🤫', desc:"Say the thing you've been holding back.", bg:'#08081A', accent:'#6366F1', hint:'No judgement', cards:[
+      {q:"Confess something you did that you got away with and never told anyone.", hint:"Statute of limitations expired"},
+      {q:"Confess a thought you've had that you're genuinely ashamed of.", hint:"We're all human"},
+      {q:"Confess something you pretend not to care about — but actually care deeply about.", hint:"Drop the act"},
+      {q:"Confess a version of yourself that only comes out around certain people.", hint:"Which version?"},
+      {q:"Confess one thing you've never said out loud because saying it makes it real.", hint:"Say it. Right now."},
+      {q:"Confess something you've done in a past relationship that you've never fully owned.", hint:"Own it"},
+    ]},
+  ],
+};
+
+// ══════════════════════════════════
+// STATE
+// ══════════════════════════════════
+let TABS, D;
+
+function loadState() {
+  try {
+    const savedTabs = localStorage.getItem('koino_admin_tabs');
+    const savedD = localStorage.getItem('koino_admin_d');
+    TABS = savedTabs ? JSON.parse(savedTabs) : JSON.parse(JSON.stringify(DEFAULT_TABS));
+    D    = savedD    ? JSON.parse(savedD)    : JSON.parse(JSON.stringify(DEFAULT_D));
+  } catch(e) {
+    TABS = JSON.parse(JSON.stringify(DEFAULT_TABS));
+    D    = JSON.parse(JSON.stringify(DEFAULT_D));
+  }
+}
+
+function saveState() {
+  localStorage.setItem('koino_admin_tabs', JSON.stringify(TABS));
+  localStorage.setItem('koino_admin_d', JSON.stringify(D));
+}
+
+loadState();
+
+// ══════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════
+let currentPage = 'dashboard';
+function showPage(p) {
+  document.querySelectorAll('[id^="page-"]').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + p).style.display = 'block';
+  const navEl = document.getElementById('nav-' + p);
+  if (navEl) navEl.classList.add('active');
+  currentPage = p;
+  if (p === 'dashboard') renderDashboard();
+  if (p === 'categories') renderCategories();
+  if (p === 'editions') renderEditionPage();
+  if (p === 'questions') renderQPage();
+  if (p === 'bulkadd') renderBulkAdd();
+  // close sidebar on mobile
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ══════════════════════════════════
+// HELPERS
+// ══════════════════════════════════
+function totalQuestions() {
+  let n = 0;
+  Object.values(D).forEach(cat => cat.forEach(ed => n += ed.cards.length));
+  return n;
+}
+function totalEditions() {
+  return Object.values(D).reduce((s, c) => s + c.length, 0);
+}
+function populateCatSelect(selId, withAll = false) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  sel.innerHTML = (withAll ? '<option value="">All Categories</option>' : '<option value="">Select...</option>') +
+    TABS.map(t => `<option value="${t.id}">${t.emoji} ${t.label}</option>`).join('');
+}
+function populateEditionSelect(selId, catId, withAll = false) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  const editions = catId ? (D[catId] || []) : Object.values(D).flat();
+  sel.innerHTML = (withAll ? '<option value="">All Editions</option>' : '<option value="">Select edition...</option>') +
+    editions.map(e => `<option value="${e.id}">${e.emoji} ${e.name}</option>`).join('');
+}
+
+// ══════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════
+function renderDashboard() {
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${TABS.length}</div><div class="stat-label">Categories</div></div>
+    <div class="stat-card"><div class="stat-num">${totalEditions()}</div><div class="stat-label">Editions</div></div>
+    <div class="stat-card"><div class="stat-num">${totalQuestions()}</div><div class="stat-label">Questions</div></div>
+    <div class="stat-card"><div class="stat-num">${Object.values(D).flat().reduce((s,e)=>s+e.cards.length,0)}</div><div class="stat-label">Total Cards</div></div>
+  `;
+  const el = document.getElementById('dashboard-editions');
+  const allEds = Object.values(D).flat().slice(0, 6);
+  el.innerHTML = '<div class="edition-list">' + allEds.map(e => editionRowHTML(e, findCatForEdition(e.id))).join('') + '</div>';
+}
+
+function findCatForEdition(edId) {
+  for (const [catId, eds] of Object.entries(D)) {
+    if (eds.find(e => e.id === edId)) return catId;
+  }
+  return null;
+}
+
+function editionRowHTML(e, catId) {
+  return `<div class="edition-row">
+    <div class="edition-emoji">${e.emoji}</div>
+    <div class="edition-info">
+      <div class="edition-name">${e.name}</div>
+      <div class="edition-meta">${e.cards.length} questions · ${TABS.find(t=>t.id===catId)?.label || catId}</div>
+    </div>
+    <div class="edition-actions">
+      <button class="btn btn-ghost" onclick="openEditEditionModal('${catId}','${e.id}')">✏️ Edit</button>
+      <button class="btn btn-danger" onclick="deleteEdition('${catId}','${e.id}')">🗑</button>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════
+// CATEGORIES
+// ══════════════════════════════════
+function renderCategories() {
+  const el = document.getElementById('cat-grid');
+  el.innerHTML = TABS.map(t => `
+    <div class="tab-card" onclick="gotoCategory('${t.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="tab-card-emoji">${t.emoji}</div>
+        <button class="tab-card-del" onclick="event.stopPropagation();deleteCategory('${t.id}')">✕</button>
+      </div>
+      <div class="tab-card-name">${t.label}</div>
+      <div class="tab-card-count">${(D[t.id]||[]).length} editions · ${(D[t.id]||[]).reduce((s,e)=>s+e.cards.length,0)} questions</div>
+    </div>
+  `).join('') + `
+    <div class="tab-card" onclick="openNewCategoryModal()" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:100px;">
+      <div style="font-size:28px;">+</div>
+      <div style="font-size:14px;color:var(--muted);">New Category</div>
+    </div>`;
+}
+
+function gotoCategory(catId) {
+  document.getElementById('edition-cat-filter').value = catId;
+  showPage('editions');
+}
+
+function openNewCategoryModal() {
+  document.getElementById('new-cat-emoji').value = '';
+  document.getElementById('new-cat-name').value = '';
+  document.getElementById('new-cat-hook').value = '';
+  openModal('modal-category');
+}
+
+function saveNewCategory() {
+  const emoji = document.getElementById('new-cat-emoji').value.trim() || '📁';
+  const name  = document.getElementById('new-cat-name').value.trim();
+  const hook  = document.getElementById('new-cat-hook').value.trim();
+  if (!name) { showToast('Give the category a name'); return; }
+  const id = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+  if (TABS.find(t => t.id === id)) { showToast('A category with that name already exists'); return; }
+  TABS.push({ id, label: name, emoji, hook });
+  if (!D[id]) D[id] = [];
+  saveState();
+  closeModal('modal-category');
+  renderCategories();
+  showToast(`✅ Category "${name}" created`);
+}
+
+function deleteCategory(catId) {
+  if (!confirm(`Delete "${TABS.find(t=>t.id===catId)?.label}" and ALL its editions and questions? This cannot be undone.`)) return;
+  TABS = TABS.filter(t => t.id !== catId);
+  delete D[catId];
+  saveState();
+  renderCategories();
+  showToast('Category deleted');
+}
+
+// ══════════════════════════════════
+// EDITIONS
+// ══════════════════════════════════
+function renderEditionPage() {
+  populateCatSelect('edition-cat-filter', true);
+  const catId = document.getElementById('edition-cat-filter').value;
+  const el = document.getElementById('edition-list');
+  let editions = [];
+  if (catId) {
+    editions = (D[catId] || []).map(e => ({ e, catId }));
+    document.getElementById('editions-sub').textContent = `${TABS.find(t=>t.id===catId)?.label} · ${editions.length} editions`;
+  } else {
+    for (const [cid, eds] of Object.entries(D)) {
+      eds.forEach(e => editions.push({ e, catId: cid }));
+    }
+    document.getElementById('editions-sub').textContent = `All categories · ${editions.length} editions`;
+  }
+  if (!editions.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📚</div><div class="empty-title">No editions yet</div><p style="color:var(--muted);font-size:14px;">Create one using the button above.</p></div>`;
+    return;
+  }
+  el.innerHTML = editions.map(({e, catId}) => editionRowHTML(e, catId)).join('');
+}
+
+function openNewEditionModal() {
+  document.getElementById('modal-edition-title').textContent = 'New Edition';
+  document.getElementById('new-ed-emoji').value = '';
+  document.getElementById('new-ed-name').value = '';
+  document.getElementById('new-ed-desc').value = '';
+  document.getElementById('new-ed-hint').value = '';
+  document.getElementById('new-ed-bg').value = '#0E0B18';
+  document.getElementById('new-ed-accent').value = '#8B5CF6';
+  document.getElementById('edit-ed-id').value = '';
+  populateCatSelect('new-ed-cat');
+  openModal('modal-edition');
+}
+
+function openEditEditionModal(catId, edId) {
+  const ed = (D[catId]||[]).find(e=>e.id===edId);
+  if (!ed) return;
+  document.getElementById('modal-edition-title').textContent = 'Edit Edition';
+  document.getElementById('new-ed-emoji').value = ed.emoji || '';
+  document.getElementById('new-ed-name').value = ed.name || '';
+  document.getElementById('new-ed-desc').value = ed.desc || '';
+  document.getElementById('new-ed-hint').value = ed.hint || '';
+  document.getElementById('new-ed-bg').value = ed.bg || '#0E0B18';
+  document.getElementById('new-ed-accent').value = ed.accent || '#8B5CF6';
+  document.getElementById('edit-ed-id').value = edId;
+  populateCatSelect('new-ed-cat');
+  document.getElementById('new-ed-cat').value = catId;
+  openModal('modal-edition');
+}
+
+function saveEdition() {
+  const emoji  = document.getElementById('new-ed-emoji').value.trim() || '📋';
+  const name   = document.getElementById('new-ed-name').value.trim();
+  const desc   = document.getElementById('new-ed-desc').value.trim();
+  const hint   = document.getElementById('new-ed-hint').value.trim();
+  const bg     = document.getElementById('new-ed-bg').value;
+  const accent = document.getElementById('new-ed-accent').value;
+  const catId  = document.getElementById('new-ed-cat').value;
+  const editId = document.getElementById('edit-ed-id').value;
+  if (!name)  { showToast('Edition needs a name'); return; }
+  if (!catId) { showToast('Select a category'); return; }
+  if (!D[catId]) D[catId] = [];
+
+  if (editId) {
+    // editing existing
+    const idx = D[catId].findIndex(e => e.id === editId);
+    if (idx > -1) { D[catId][idx] = { ...D[catId][idx], emoji, name, desc, hint, bg, accent }; }
+  } else {
+    const id = catId + '-' + name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'') + '-' + Date.now();
+    D[catId].push({ id, emoji, name, desc, hint, bg, accent, cards: [] });
+  }
+  saveState();
+  closeModal('modal-edition');
+  renderEditionPage();
+  renderDashboard();
+  showToast(editId ? '✅ Edition updated' : `✅ Edition "${name}" created`);
+}
+
+function deleteEdition(catId, edId) {
+  const ed = (D[catId]||[]).find(e=>e.id===edId);
+  if (!confirm(`Delete edition "${ed?.name}" and all its questions?`)) return;
+  D[catId] = D[catId].filter(e => e.id !== edId);
+  saveState();
+  renderEditionPage();
+  showToast('Edition deleted');
+}
+
+// ══════════════════════════════════
+// QUESTIONS PAGE
+// ══════════════════════════════════
+function renderQPage() {
+  populateCatSelect('q-cat-filter', true);
+  const catId = document.getElementById('q-cat-filter').value;
+  populateEditionSelect('q-ed-filter', catId, true);
+  const edId = document.getElementById('q-ed-filter').value;
+
+  const wrap = document.getElementById('q-list-wrap');
+  let html = '';
+
+  const catsToRender = catId ? [catId] : Object.keys(D);
+  for (const cid of catsToRender) {
+    const editions = D[cid] || [];
+    for (const ed of editions) {
+      if (edId && ed.id !== edId) continue;
+      html += `
+        <div class="qeditor" style="margin-bottom:20px;">
+          <div class="qeditor-hdr">
+            <div class="qeditor-hdr-left">
+              <span style="font-size:22px;">${ed.emoji}</span>
+              <div class="qeditor-title">${ed.name}</div>
+              <div class="qeditor-count">${ed.cards.length} questions</div>
+            </div>
+            <button class="btn btn-primary" style="font-size:12px;padding:7px 14px;" onclick="openAddOneQuestion('${cid}','${ed.id}')">+ Add</button>
+          </div>
+          <div class="qlist">
+            ${ed.cards.length === 0 ? '<div style="padding:12px;color:var(--muted);font-size:14px;text-align:center;">No questions yet — add some above</div>' :
+              ed.cards.map((c,i) => `
+                <div class="qrow">
+                  <div class="qrow-num">${i+1}</div>
+                  <div class="qrow-body">
+                    <div class="qrow-q">${c.q || c}</div>
+                    ${(c.hint) ? `<div class="qrow-hint">${c.hint}</div>` : ''}
+                  </div>
+                  <div class="qrow-actions">
+                    <button class="icon-btn icon-btn-edit" onclick="openEditQ('${cid}','${ed.id}',${i})">✏️</button>
+                    <button class="icon-btn icon-btn-del" onclick="deleteQ('${cid}','${ed.id}',${i})">🗑</button>
+                  </div>
+                </div>
+              `).join('')
+            }
+          </div>
+        </div>`;
+    }
+  }
+  if (!html) html = `<div class="empty"><div class="empty-icon">💬</div><div class="empty-title">No questions found</div></div>`;
+  wrap.innerHTML = html;
+}
+
+function openAddOneQuestion(catId, edId) {
+  document.getElementById('edit-q-text').value = '';
+  document.getElementById('edit-q-hint').value = '';
+  document.getElementById('edit-q-cat').value = catId;
+  document.getElementById('edit-q-edition').value = edId;
+  document.getElementById('edit-q-idx').value = '-1';
+  document.querySelector('#modal-question .modal-title').textContent = 'Add Question';
+  openModal('modal-question');
+}
+
+function openEditQ(catId, edId, idx) {
+  const ed = (D[catId]||[]).find(e=>e.id===edId);
+  if (!ed) return;
+  const card = ed.cards[idx];
+  document.getElementById('edit-q-text').value = card.q || card;
+  document.getElementById('edit-q-hint').value = card.hint || '';
+  document.getElementById('edit-q-cat').value = catId;
+  document.getElementById('edit-q-edition').value = edId;
+  document.getElementById('edit-q-idx').value = idx;
+  document.querySelector('#modal-question .modal-title').textContent = 'Edit Question';
+  openModal('modal-question');
+}
+
+function saveEditQuestion() {
+  const q    = document.getElementById('edit-q-text').value.trim();
+  const hint = document.getElementById('edit-q-hint').value.trim();
+  const catId = document.getElementById('edit-q-cat').value;
+  const edId  = document.getElementById('edit-q-edition').value;
+  const idx   = parseInt(document.getElementById('edit-q-idx').value);
+  if (!q) { showToast('Question cannot be empty'); return; }
+  const ed = (D[catId]||[]).find(e=>e.id===edId);
+  if (!ed) return;
+  const card = { q, hint };
+  if (idx === -1) { ed.cards.push(card); }
+  else            { ed.cards[idx] = card; }
+  saveState();
+  closeModal('modal-question');
+  renderQPage();
+  showToast(idx === -1 ? '✅ Question added' : '✅ Question updated');
+}
+
+function deleteQ(catId, edId, idx) {
+  if (!confirm('Delete this question?')) return;
+  const ed = (D[catId]||[]).find(e=>e.id===edId);
+  if (!ed) return;
+  ed.cards.splice(idx, 1);
+  saveState();
+  renderQPage();
+  showToast('Question deleted');
+}
+
+// ══════════════════════════════════
+// BULK ADD
+// ══════════════════════════════════
+function renderBulkAdd() {
+  populateCatSelect('bulk-cat');
+}
+
+function populateBulkEdition() {
+  const catId = document.getElementById('bulk-cat').value;
+  populateEditionSelect('bulk-edition', catId);
+}
+
+function doBulkAdd() {
+  const catId   = document.getElementById('bulk-cat').value;
+  const edId    = document.getElementById('bulk-edition').value;
+  const rawText = document.getElementById('bulk-ta').value.trim();
+  const defHint = document.getElementById('bulk-default-hint').value.trim();
+
+  if (!catId)   { showToast('Select a category first'); return; }
+  if (!edId)    { showToast('Select an edition first'); return; }
+  if (!rawText) { showToast('Paste some questions first'); return; }
+
+  const ed = (D[catId]||[]).find(e=>e.id===edId);
+  if (!ed) { showToast('Edition not found'); return; }
+
+  const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 2);
+  let added = 0;
+  lines.forEach(line => {
+    const parts = line.split('|');
+    const q = parts[0].trim();
+    const hint = (parts[1] ? parts[1].trim() : defHint) || '';
+    if (q) { ed.cards.push({ q, hint }); added++; }
+  });
+
+  saveState();
+  showToast(`✅ ${added} questions added to "${ed.name}"`);
+  document.getElementById('bulk-ta').value = '';
+  document.getElementById('bulk-preview').innerHTML = `
+    <div style="background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);border-radius:10px;padding:14px 16px;font-size:14px;color:var(--green);">
+      ✅ <strong>${added} questions</strong> added to <strong>${ed.emoji} ${ed.name}</strong>. Go to <span style="cursor:pointer;text-decoration:underline;" onclick="showPage('questions')">Questions</span> to review them.
+    </div>`;
+}
+
+// ══════════════════════════════════
+// MODAL HELPERS
+// ══════════════════════════════════
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ══════════════════════════════════
+// EXPORT STEPS ACCORDION
+// ══════════════════════════════════
+function toggleStep(hdr) {
+  const body = hdr.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  hdr.classList.toggle('open', !isOpen);
+}
+
+// ══════════════════════════════════
+// EXPORT — generate full koino.html
+// ══════════════════════════════════
+function exportToApp() {
+  const tabsJSON = JSON.stringify(TABS, null, 2);
+  const hooksObj = {};
+  TABS.forEach(t => { hooksObj[t.id] = t.hook || ''; });
+  const hooksJSON = JSON.stringify(hooksObj, null, 2);
+  const dJSON = JSON.stringify(D, null, 2);
+
+  const appHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Koino</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:#13121A;min-height:100vh;-webkit-text-size-adjust:100%}
+body{font-family:'Outfit',system-ui,sans-serif;color:#F2EFE9;overflow-x:hidden}
+div[onclick]{cursor:pointer}
+button{-webkit-appearance:none;appearance:none;font-family:'Outfit',system-ui,sans-serif;cursor:pointer}
+.screen{display:none;min-height:100vh;flex-direction:column;background:#13121A}
+.screen.active{display:flex}
+.di{position:fixed;top:12px;left:50%;transform:translateX(-50%);background:#1E1C2A;border-radius:22px;padding:9px 22px;display:flex;align-items:center;gap:7px;z-index:200;box-shadow:0 0 0 1px rgba(255,255,255,.10);min-width:110px;justify-content:center;}
+.di-dot{width:7px;height:7px;border-radius:50%;background:#9D6FFF;box-shadow:0 0 10px #9D6FFF;animation:dp 2.5s ease-in-out infinite;}
+@keyframes dp{0%,100%{opacity:1}50%{opacity:.4;transform:scale(.7)}}
+.di-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:#888;}
+#home{overflow-y:auto;padding-bottom:60px}
+.home-header{padding:62px 24px 0;display:flex;align-items:flex-start;justify-content:space-between;}
+.k-logo{font-family:'Playfair Display',Georgia,serif;font-size:48px;font-weight:900;color:#F2EFE9;letter-spacing:-2px;line-height:1;display:flex;align-items:flex-start;}
+.k-star{font-size:18px;color:#A78BFA;margin-left:2px;margin-top:5px;animation:spin 10s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pro-badge{display:flex;align-items:center;gap:4px;background:linear-gradient(135deg,#7C3AED,#5B21B6);padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;color:white;letter-spacing:.5px;box-shadow:0 4px 18px rgba(124,58,237,.45);margin-top:6px;}
+.home-sub{padding:10px 24px 6px;font-size:16px;color:#888;font-weight:400;}
+.hook-banner{margin:14px 24px 20px;padding:14px 18px;background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(99,102,241,.08));border:1px solid rgba(139,92,246,.25);border-radius:18px;font-size:13px;color:#C4B5FD;line-height:1.5;font-style:italic;}
+.tabs-wrap{padding:0 20px 18px;overflow-x:auto;scrollbar-width:none;}
+.tabs-wrap::-webkit-scrollbar{display:none}
+.tabs{display:flex;gap:8px;width:max-content;}
+.tab{padding:9px 18px;border-radius:24px;font-size:14px;font-weight:600;color:#888;background:#1E1C2A;border:1px solid rgba(255,255,255,.09);white-space:nowrap;transition:all .22s;flex-shrink:0;}
+.tab.on{background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:white;border-color:transparent;box-shadow:0 4px 18px rgba(139,92,246,.4);}
+.section-label{padding:4px 24px 10px;font-size:11px;font-weight:700;letter-spacing:2px;color:#555;text-transform:uppercase;}
+.cats{padding:0 16px;display:flex;flex-direction:column;gap:10px}
+.cat{display:flex;align-items:center;gap:16px;padding:18px;border-radius:22px;background:#1E1C2A;border:1px solid rgba(255,255,255,.09);transition:transform .15s;}
+.cat:active{transform:scale(.98)}
+.emo{width:58px;height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4));}
+.cat-info{flex:1}
+.cat-name{font-family:'Playfair Display',Georgia,serif;font-size:19px;font-weight:700;color:#F2EFE9;letter-spacing:-.3px;margin-bottom:4px;}
+.cat-desc{font-size:13px;color:#888;line-height:1.4}
+.chevron{color:#4A4860;font-size:22px;font-weight:200}
+#cards{overflow:hidden;position:relative}
+.c-header{display:flex;align-items:center;justify-content:space-between;padding:58px 20px 14px;flex-shrink:0;}
+.c-back{width:44px;height:44px;border-radius:50%;background:#1E1C2A;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:20px;color:#AAA;flex-shrink:0;}
+.c-mid{text-align:center;flex:1;padding:0 12px}
+.c-catname{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#F2EFE9;letter-spacing:-.3px;}
+.c-subdesc{font-size:12px;color:#888;margin-top:3px}
+.c-num{font-family:'DM Mono',monospace;font-size:12px;color:#999;background:#1E1C2A;padding:7px 13px;border-radius:12px;border:1px solid rgba(255,255,255,.10);flex-shrink:0;}
+.prog{padding:2px 20px 14px;flex-shrink:0}
+.prog-t{height:3px;background:rgba(255,255,255,.12);border-radius:2px}
+.prog-f{height:100%;background:linear-gradient(90deg,#8B5CF6,#C4B5FD);border-radius:2px;transition:width .4s}
+.stack{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:0 20px;}
+.si{position:absolute;top:20px;padding:7px 16px;border-radius:20px;font-size:13px;font-weight:700;letter-spacing:.5px;opacity:0;transition:opacity .12s;pointer-events:none;z-index:20;}
+.si-l{left:24px;background:rgba(239,68,68,.95);color:white}
+.si-r{right:24px;background:rgba(139,92,246,.95);color:white}
+.qcard{position:absolute;width:100%;max-width:370px;min-height:400px;border-radius:28px;padding:32px 28px 28px;display:flex;flex-direction:column;user-select:none;-webkit-user-select:none;will-change:transform;box-shadow:0 24px 64px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.08);overflow:hidden;}
+.qcard.c0{z-index:3;transform:translateX(0) rotate(0)}
+.qcard.c1{z-index:2;transform:translateY(12px) scale(.95);opacity:.7;pointer-events:none}
+.qcard.c2{z-index:1;transform:translateY(24px) scale(.90);opacity:.4;pointer-events:none}
+.qcard.exit-l{z-index:4;transform:translateX(-130%) rotate(-18deg);opacity:0;transition:transform .38s ease,opacity .38s}
+.qcard.exit-r{z-index:4;transform:translateX(130%) rotate(18deg);opacity:0;transition:transform .38s ease,opacity .38s}
+.qcard.c1 .qcard-q,.qcard.c1 .qcard-emoji,.qcard.c1 .qcard-foot,.qcard.c2 .qcard-q,.qcard.c2 .qcard-emoji,.qcard.c2 .qcard-foot{visibility:hidden;}
+.qcard-edition{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:16px;text-transform:uppercase;}
+.qcard-emoji{font-size:38px;margin-bottom:18px;filter:drop-shadow(0 6px 12px rgba(0,0,0,.3));line-height:1;}
+.qcard-q{font-family:'Playfair Display',Georgia,serif;font-size:26px;font-weight:700;line-height:1.38;color:#F2EFE9;flex:1;letter-spacing:-.5px;}
+.qcard-foot{margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;}
+.qcard-hint{font-size:12px;color:rgba(255,255,255,.5);font-style:italic}
+.qcard-swipe{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.35);letter-spacing:1.5px}
+.actions{display:flex;align-items:center;justify-content:center;gap:16px;padding:14px 20px 44px;flex-shrink:0;}
+.abtn{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;background:#1E1C2A;border:1px solid rgba(255,255,255,.12);color:#AAA;transition:transform .15s;}
+.abtn:active{transform:scale(.88)}
+.abtn-main{width:76px;height:76px;font-size:28px;background:linear-gradient(135deg,#8B5CF6,#6D28D9);border:none !important;color:white;box-shadow:0 8px 30px rgba(139,92,246,.6);}
+.abtn-fav.faved{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.35);color:#EF4444}
+.done-ov{position:absolute;inset:0;background:#13121A;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center;z-index:30;}
+.done-ring{width:116px;height:116px;border-radius:50%;background:linear-gradient(135deg,#8B5CF6,#6D28D9);display:flex;align-items:center;justify-content:center;font-size:50px;margin-bottom:28px;box-shadow:0 20px 60px rgba(139,92,246,.6);}
+.done-t{font-family:'Playfair Display',serif;font-size:34px;font-weight:900;color:#F2EFE9;margin-bottom:10px;letter-spacing:-.5px;}
+.done-s{font-size:15px;color:#888;line-height:1.6;max-width:260px;margin-bottom:32px}
+.done-b1{width:100%;max-width:300px;padding:16px;border-radius:16px;background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:white;font-size:16px;font-weight:700;border:none;margin-bottom:10px;box-shadow:0 8px 24px rgba(139,92,246,.45);}
+.done-b2{width:100%;max-width:300px;padding:15px;border-radius:16px;background:#1E1C2A;color:#AAA;font-size:15px;border:1px solid rgba(255,255,255,.12);}
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:#2A2840;color:#F2EFE9;font-size:13px;font-weight:500;padding:10px 22px;border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.4);opacity:0;transition:all .3s;z-index:999;white-space:nowrap;border:1px solid rgba(255,255,255,.12);}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+
+</head>
+<body>
+<div class="di"><div class="di-dot"></div><div class="di-label">KOINO</div></div>
+<div id="home" class="screen active">
+  <div class="home-header">
+    <div class="k-logo">Koino<span class="k-star">✦</span></div>
+    <div class="pro-badge">💎 PRO</div>
+  </div>
+  <div class="home-sub">What are we exploring today?</div>
+  <div class="hook-banner" id="hook-banner"></div>
+  <div class="tabs-wrap"><div class="tabs" id="tabs"></div></div>
+  <div class="section-label" id="section-label">EDITIONS</div>
+  <div class="cats" id="cats"></div>
+</div>
+<div id="cards" class="screen">
+  <div class="c-header">
+    <div class="c-back" onclick="goHome()">←</div>
+    <div class="c-mid">
+      <div class="c-catname" id="c-catname"></div>
+      <div class="c-subdesc" id="c-subdesc"></div>
+    </div>
+    <div class="c-num" id="c-num">1/5</div>
+  </div>
+  <div class="prog"><div class="prog-t"><div class="prog-f" id="prog-f" style="width:0%"></div></div></div>
+  <div class="stack" id="stack">
+    <div class="si si-l" id="si-l">SKIP</div>
+    <div class="si si-r" id="si-r">✓ NEXT</div>
+  </div>
+  <div class="actions">
+    <div class="abtn" id="undo-btn" onclick="doUndo()">↩</div>
+    <div class="abtn abtn-main" onclick="doSwipe('right')">→</div>
+    <div class="abtn abtn-fav" id="fav-btn" onclick="doFav()">♡</div>
+  </div>
+  <div class="done-ov" id="done-ov">
+    <div class="done-ring">✦</div>
+    <div class="done-t">All done!</div>
+    <p class="done-s">You've gone through all the cards. Sit with what came up.</p>
+    <button class="done-b1" onclick="doRestart()">Shuffle &amp; Play Again</button>
+    <button class="done-b2" onclick="goHome()">Back to Home</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const TABS=${tabsJSON};
+const HOOKS=${hooksJSON};
+const D=${dJSON};
+let activeTab=TABS[0]?.id||'',cat=null,deck=[],idx=0,history=[];
+let favs=JSON.parse(localStorage.getItem('k_favs')||'[]');
+function renderTabs(){const el=document.getElementById('tabs');el.innerHTML=TABS.map(t=>\`<div class="tab\${t.id===activeTab?' on':''}" data-id="\${t.id}">\${t.emoji} \${t.label}</div>\`).join('');el.querySelectorAll('.tab').forEach(tab=>{tab.addEventListener('click',()=>{activeTab=tab.dataset.id;renderTabs();renderCats();updateHook();});});}
+function updateHook(){document.getElementById('hook-banner').textContent=HOOKS[activeTab]||'';}
+function renderCats(){const el=document.getElementById('cats');const list=D[activeTab]||[];document.getElementById('section-label').textContent=list.length+' EDITIONS';el.innerHTML=list.map((c,i)=>\`<div class="cat" data-id="\${c.id}" style="animation:fi .28s ease \${i*.05}s both"><div class="emo" style="background:\${c.bg}">\${c.emoji}</div><div class="cat-info"><div class="cat-name">\${c.name}</div><div class="cat-desc">\${c.desc}</div></div><div class="chevron">›</div></div>\`).join('');el.querySelectorAll('.cat').forEach(catEl=>{let tY=0,tM=false;catEl.addEventListener('touchstart',e=>{tY=e.touches[0].clientY;tM=false;},{passive:true});catEl.addEventListener('touchmove',e=>{if(Math.abs(e.touches[0].clientY-tY)>8)tM=true;},{passive:true});catEl.addEventListener('touchend',e=>{if(!tM){e.preventDefault();openCat(catEl.dataset.id);}});catEl.addEventListener('click',()=>openCat(catEl.dataset.id));});}
+function openCat(id){const list=D[activeTab]||[];cat=list.find(c=>c.id===id);if(!cat)return;if(!cat.cards?.length){showToast('No cards yet');return;}deck=shuf([...cat.cards]);idx=0;history=[];document.getElementById('c-catname').textContent=cat.name;document.getElementById('c-subdesc').textContent=cat.desc;document.getElementById('done-ov').style.display='none';document.getElementById('fav-btn').className='abtn abtn-fav';document.getElementById('fav-btn').textContent='♡';show('cards');buildStack();}
+function goHome(){show('home');}
+function buildStack(){const wrap=document.getElementById('stack');wrap.querySelectorAll('.qcard').forEach(c=>c.remove());const tot=deck.length;document.getElementById('c-num').textContent=\`\${idx+1}/\${tot}\`;document.getElementById('prog-f').style.width=(idx/tot*100)+'%';document.getElementById('undo-btn').style.opacity=history.length>0?'1':'0.3';for(let i=Math.min(2,tot-idx-1);i>=0;i--){const el=makeCard(deck[idx+i]);el.classList.add('c'+i);wrap.appendChild(el);}const top=wrap.querySelector('.qcard.c0');if(top)attachSwipe(top);}
+function makeCard(card){const el=document.createElement('div');el.className='qcard';el.style.background=\`linear-gradient(160deg,\${cat.accent}EE 0%,\${cat.accent}88 35%,\${cat.bg} 75%)\`;el.innerHTML=\`<div class="qcard-edition">\${cat.name.toUpperCase()} · KOINO</div><div class="qcard-emoji">\${cat.emoji}</div><div class="qcard-q">\${card.q||card}</div><div class="qcard-foot"><div class="qcard-hint">\${card.hint||''}</div><div class="qcard-swipe">SWIPE →</div></div>\`;return el;}
+function attachSwipe(el){let sx=0,sy=0,dx=0,drag=false;const s=e=>{sx=e.touches?e.touches[0].clientX:e.clientX;sy=e.touches?e.touches[0].clientY:e.clientY;drag=true;el.style.transition='none';};const m=e=>{if(!drag)return;dx=(e.touches?e.touches[0].clientX:e.clientX)-sx;const dy=(e.touches?e.touches[0].clientY:e.clientY)-sy;if(Math.abs(dx)>Math.abs(dy)){if(e.cancelable)e.preventDefault();el.style.transform=\`translateX(\${dx}px) rotate(\${dx*.07}deg)\`;const l=document.getElementById('si-l'),r=document.getElementById('si-r');if(dx<-30){l.textContent='↩ BACK';l.style.opacity=Math.min(1,(Math.abs(dx)-30)/60)+'';r.style.opacity='0';}else if(dx>30){r.textContent='✓ NEXT';r.style.opacity=Math.min(1,(dx-30)/60)+'';l.style.opacity='0';}else{l.style.opacity='0';r.style.opacity='0';}}};const e2=()=>{if(!drag)return;drag=false;el.style.transition='';document.getElementById('si-l').style.opacity='0';document.getElementById('si-r').style.opacity='0';if(dx<-80)doUndo();else if(dx>80)doSwipe('right');else el.style.transform='translateX(0) rotate(0)';dx=0;};el.addEventListener('touchstart',s,{passive:true});el.addEventListener('touchmove',m,{passive:false});el.addEventListener('touchend',e2);el.addEventListener('mousedown',s);window.addEventListener('mousemove',m);window.addEventListener('mouseup',e2);}
+function doSwipe(dir){const wrap=document.getElementById('stack');const top=wrap.querySelector('.qcard.c0');if(!top)return;history.push(idx);top.classList.remove('c0');top.classList.add(dir==='left'?'exit-l':'exit-r');setTimeout(()=>top.remove(),420);idx++;const tot=deck.length;if(idx>=tot){setTimeout(()=>{document.getElementById('done-ov').style.display='flex';},350);document.getElementById('prog-f').style.width='100%';return;}document.getElementById('c-num').textContent=\`\${idx+1}/\${tot}\`;document.getElementById('prog-f').style.width=(idx/tot*100)+'%';document.getElementById('undo-btn').style.opacity='1';const c1=wrap.querySelector('.qcard.c1'),c2=wrap.querySelector('.qcard.c2');if(c1){c1.classList.remove('c1');c1.classList.add('c0');attachSwipe(c1);}if(c2){c2.classList.remove('c2');c2.classList.add('c1');}if(idx+2<tot){const nc=makeCard(deck[idx+2]);nc.classList.add('c2');wrap.insertBefore(nc,wrap.querySelector('.qcard'));}}
+function doUndo(){if(history.length===0){showToast('Already at the first card');return;}idx=history.pop();buildStack();showToast('↩ Going back');}
+function doFav(){if(!deck[idx])return;const key=deck[idx].q||String(idx);const btn=document.getElementById('fav-btn');if(favs.includes(key)){favs=favs.filter(f=>f!==key);btn.className='abtn abtn-fav';btn.textContent='♡';showToast('Removed');}else{favs.push(key);btn.className='abtn abtn-fav faved';btn.textContent='♥';showToast('Saved ✦');}localStorage.setItem('k_favs',JSON.stringify(favs));}
+function doRestart(){deck=shuf([...cat.cards]);idx=0;history=[];document.getElementById('done-ov').style.display='none';buildStack();}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function shuf(a){for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2000);}
+renderTabs();renderCats();updateHook();
+document.head.insertAdjacentHTML('beforeend','<style>@keyframes fi{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}</style>');
+<\/script>
+</body>
+</html>`;
+
+const blob = new Blob([appHTML], { type: ‘text/html’ });
+const url  = URL.createObjectURL(blob);
+const a    = document.createElement(‘a’);
+a.href = url; a.download = ‘koino.html’; a.click();
+URL.revokeObjectURL(url);
+showToast(‘✅ koino.html downloaded!’);
+}
+
+// ══════════════════════════════════
+// JSON BACKUP / RESTORE
+// ══════════════════════════════════
+function exportJSON() {
+const data = { tabs: TABS, d: D, exported: new Date().toISOString() };
+const blob = new Blob([JSON.stringify(data, null, 2)], { type: ‘application/json’ });
+const url  = URL.createObjectURL(blob);
+const a    = document.createElement(‘a’);
+a.href = url; a.download = ‘koino-backup.json’; a.click();
+URL.revokeObjectURL(url);
+showToast(‘✅ Backup downloaded’);
+}
+
+function importJSON(event) {
+const file = event.target.files[0];
+if (!file) return;
+const reader = new FileReader();
+reader.onload = e => {
+try {
+const data = JSON.parse(e.target.result);
+if (!data.tabs || !data.d) { showToast(‘Invalid backup file’); return; }
+if (!confirm(‘This will replace ALL your current content. Are you sure?’)) return;
+TABS = data.tabs;
+D    = data.d;
+saveState();
+renderDashboard();
+showToast(‘✅ Content restored from backup’);
+} catch(err) { showToast(‘Could not read backup file’); }
+};
+reader.readAsText(file);
+}
+
+// ══════════════════════════════════
+// TOAST
+// ══════════════════════════════════
+function showToast(m) {
+const t = document.getElementById(‘toast’);
+t.textContent = m; t.classList.add(‘on’);
+setTimeout(() => t.classList.remove(‘on’), 2500);
+}
+
+// INIT
+showPage(‘dashboard’);
+</script>
+
+</body>
+</html>
