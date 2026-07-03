@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Koino</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:#13121A;min-height:100vh;font-family:Georgia,serif;color:#F2EFE9;overflow-x:hidden}
+button{font-family:Georgia,serif;cursor:pointer;-webkit-appearance:none;appearance:none}
+
+/* DYNAMIC ISLAND */
+.di{position:fixed;top:12px;left:50%;transform:translateX(-50%);background:#1E1C2A;border-radius:22px;padding:9px 22px;display:flex;align-items:center;gap:7px;z-index:200;box-shadow:0 0 0 1px rgba(255,255,255,.10)}
+.di-dot{width:7px;height:7px;border-radius:50%;background:#9D6FFF;box-shadow:0 0 10px #9D6FFF;animation:pulse 2.5s ease-in-out infinite}
+.di-label{font-family:monospace;font-size:10px;letter-spacing:2px;color:#888}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4;transform:scale(.7)}}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh;flex-direction:column;background:#13121A}
+.screen.active{display:flex}
+
+/* HOME */
+#home{overflow-y:auto;padding-bottom:60px}
+.home-header{padding:62px 24px 0;display:flex;align-items:flex-start;justify-content:space-between}
+.k-logo{font-size:48px;font-weight:900;color:#F2EFE9;letter-spacing:-2px;line-height:1}
+.k-star{font-size:18px;color:#A78BFA;display:inline-block;animation:spin 10s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pro-badge{background:linear-gradient(135deg,#7C3AED,#5B21B6);padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;color:white;margin-top:6px}
+.home-sub{padding:10px 24px 6px;font-size:16px;color:#888}
+.hook-banner{margin:14px 24px 20px;padding:14px 18px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.25);border-radius:18px;font-size:13px;color:#C4B5FD;line-height:1.5;font-style:italic}
+.tabs-wrap{padding:0 20px 18px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabs-wrap::-webkit-scrollbar{display:none}
+.tabs{display:flex;gap:8px;width:max-content}
+.tab{padding:9px 18px;border-radius:24px;font-size:13px;font-weight:600;color:#888;background:#1E1C2A;border:1px solid rgba(255,255,255,.09);white-space:nowrap}
+.tab.on{background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:white;border-color:transparent}
+.section-label{padding:4px 24px 10px;font-size:11px;letter-spacing:2px;color:#555;text-transform:uppercase}
+.cats{padding:0 16px;display:flex;flex-direction:column;gap:10px}
+.cat{display:flex;align-items:center;gap:16px;padding:18px;border-radius:22px;background:#1E1C2A;border:1px solid rgba(255,255,255,.09);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cat:active{opacity:.8}
+.emo{width:58px;height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.cat-info{flex:1}
+.cat-name{font-size:19px;font-weight:700;color:#F2EFE9;margin-bottom:4px}
+.cat-desc{font-size:13px;color:#888;line-height:1.4}
+.chevron{color:#4A4860;font-size:22px}
+
+/* CARD SCREEN */
+#cards{overflow:hidden;position:relative}
+.c-header{display:flex;align-items:center;justify-content:space-between;padding:58px 20px 14px;flex-shrink:0}
+.c-back{width:44px;height:44px;border-radius:50%;background:#1E1C2A;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:20px;color:#AAA;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.c-mid{text-align:center;flex:1;padding:0 12px}
+.c-catname{font-size:20px;font-weight:700;color:#F2EFE9}
+.c-subdesc{font-size:12px;color:#888;margin-top:3px}
+.c-num{font-family:monospace;font-size:12px;color:#999;background:#1E1C2A;padding:7px 13px;border-radius:12px;border:1px solid rgba(255,255,255,.10);flex-shrink:0}
+.prog{padding:2px 20px 14px;flex-shrink:0}
+.prog-bg{height:3px;background:rgba(255,255,255,.12);border-radius:2px}
+.prog-fill{height:100%;background:linear-gradient(90deg,#8B5CF6,#C4B5FD);border-radius:2px;width:0%;transition:width .4s}
+
+/* STACK */
+.stack{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:0 20px;touch-action:pan-y}
+.si{position:absolute;top:20px;padding:7px 16px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;z-index:20;transition:opacity .1s}
+.si-l{left:24px;background:rgba(239,68,68,.95);color:white}
+.si-r{right:24px;background:rgba(139,92,246,.95);color:white}
+
+/* CARD */
+.qcard{position:absolute;width:calc(100% - 40px);max-width:370px;min-height:400px;border-radius:28px;padding:32px 28px 28px;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.5);overflow:hidden;cursor:grab;-webkit-user-select:none;user-select:none}
+.qcard.c0{z-index:3}
+.qcard.c1{z-index:2;transform:translateY(12px) scale(.95);opacity:.7;pointer-events:none}
+.qcard.c2{z-index:1;transform:translateY(24px) scale(.90);opacity:.4;pointer-events:none}
+.qcard.c1 .qcard-q,.qcard.c1 .qcard-emoji,.qcard.c1 .qcard-foot,
+.qcard.c2 .qcard-q,.qcard.c2 .qcard-emoji,.qcard.c2 .qcard-foot{visibility:hidden}
+.qcard.fly-left{z-index:4;transform:translateX(-130%) rotate(-18deg)!important;opacity:0;transition:transform .38s ease,opacity .38s}
+.qcard.fly-right{z-index:4;transform:translateX(130%) rotate(18deg)!important;opacity:0;transition:transform .38s ease,opacity .38s}
+.qcard-edition{font-family:monospace;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:16px;text-transform:uppercase}
+.qcard-emoji{font-size:38px;margin-bottom:18px;line-height:1}
+.qcard-q{font-size:26px;font-weight:700;line-height:1.38;color:#F2EFE9;flex:1}
+.qcard-foot{margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between}
+.qcard-hint{font-size:12px;color:rgba(255,255,255,.5);font-style:italic}
+.qcard-swipe{font-family:monospace;font-size:9px;color:rgba(255,255,255,.35);letter-spacing:1.5px}
+
+/* ACTIONS */
+.actions{display:flex;align-items:center;justify-content:center;gap:16px;padding:14px 20px 44px;flex-shrink:0}
+.abtn{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;background:#1E1C2A;border:1px solid rgba(255,255,255,.12);color:#AAA;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.abtn:active{transform:scale(.88)}
+.abtn-main{width:76px;height:76px;font-size:28px;background:linear-gradient(135deg,#8B5CF6,#6D28D9);border:none;color:white;box-shadow:0 8px 30px rgba(139,92,246,.6)}
+.abtn-fav.faved{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.35);color:#EF4444}
+
+/* DONE */
+.done-ov{position:absolute;inset:0;background:#13121A;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center;z-index:30}
+.done-ring{width:116px;height:116px;border-radius:50%;background:linear-gradient(135deg,#8B5CF6,#6D28D9);display:flex;align-items:center;justify-content:center;font-size:50px;margin-bottom:28px}
+.done-t{font-size:34px;font-weight:900;color:#F2EFE9;margin-bottom:10px}
+.done-s{font-size:15px;color:#888;line-height:1.6;max-width:260px;margin-bottom:32px}
+.done-b1{width:100%;max-width:300px;padding:16px;border-radius:16px;background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:white;font-size:16px;font-weight:700;border:none;margin-bottom:10px;cursor:pointer}
+.done-b2{width:100%;max-width:300px;padding:15px;border-radius:16px;background:#1E1C2A;color:#AAA;font-size:15px;border:1px solid rgba(255,255,255,.12);cursor:pointer}
+
+/* TOAST */
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:#2A2840;color:#F2EFE9;font-size:13px;padding:10px 22px;border-radius:20px;opacity:0;transition:all .3s;z-index:999;pointer-events:none;white-space:nowrap;border:1px solid rgba(255,255,255,.12)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@keyframes slideIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+</style>
+
+</head>
+<body>
+
+<div class="di"><div class="di-dot"></div><div class="di-label">KOINO</div></div>
+
+<!-- HOME -->
+
+<div id="home" class="screen active">
+  <div class="home-header">
+    <div class="k-logo">Koino<span class="k-star">&#10022;</span></div>
+    <div class="pro-badge">&#128142; PRO</div>
+  </div>
+  <div class="home-sub">What are we exploring today?</div>
+  <div class="hook-banner" id="hook-banner"></div>
+  <div class="tabs-wrap"><div class="tabs" id="tabs"></div></div>
+  <div class="section-label" id="section-label">EDITIONS</div>
+  <div class="cats" id="cats"></div>
+</div>
+
+<!-- CARDS -->
+
+<div id="cards" class="screen">
+  <div class="c-header">
+    <div class="c-back" id="back-btn">&#8592;</div>
+    <div class="c-mid">
+      <div class="c-catname" id="c-catname"></div>
+      <div class="c-subdesc" id="c-subdesc"></div>
+    </div>
+    <div class="c-num" id="c-num">1/1</div>
+  </div>
+  <div class="prog"><div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div></div>
+  <div class="stack" id="stack">
+    <div class="si si-l" id="si-l">BACK</div>
+    <div class="si si-r" id="si-r">NEXT</div>
+  </div>
+  <div class="actions">
+    <div class="abtn" id="undo-btn">&#8617;</div>
+    <div class="abtn abtn-main" id="next-btn">&#8594;</div>
+    <div class="abtn abtn-fav" id="fav-btn">&#9825;</div>
+  </div>
+  <div class="done-ov" id="done-ov">
+    <div class="done-ring">&#10022;</div>
+    <div class="done-t">All done!</div>
+    <p class="done-s">You've gone through all the cards. Sit with what came up.</p>
+    <button class="done-b1" id="restart-btn">Shuffle &amp; Play Again</button>
+    <button class="done-b2" id="home-btn2">Back to Home</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TABS = [
+  { id:'marriage',   label:'💍 Marriage' },
+  { id:'courtship',  label:'🌹 Courtship' },
+  { id:'couples',    label:'🔗 Couples' },
+  { id:'longdist',   label:'📱 Long Distance' },
+  { id:'parenting',  label:'👨‍👩‍👧 Parenting' },
+  { id:'singles',    label:'🌙 Singles' },
+  { id:'healing',    label:'🌿 Healing' },
+  { id:'faith',      label:'✨ Faith' },
+  { id:'friends',    label:'🤝 Friends' },
+  { id:'latenights', label:'🕯 Late Nights' },
+  { id:'fun',        label:'🎯 Fun' },
+];
+
+const HOOKS = {
+  marriage:   'Before you assume your marriage is healthy — open one of these tonight.',
+  courtship:  'Before you assume they\'re the one — ask them this on your next call.',
+  couples:    'Before you assume "we\'re okay" — go a little deeper tonight.',
+  longdist:   'Before you assume distance is just distance — have this conversation.',
+  parenting:  'Before you assume they\'re too young to understand — ask them tonight.',
+  singles:    'Before you assume you\'re ready — ask yourself this first.',
+  healing:    'Before you assume you\'re fully healed — sit with these questions.',
+  faith:      'Before you assume you know what God is building — listen a little longer.',
+  friends:    'Before you assume they already know how much they mean to you — say it.',
+  latenights: 'It\'s late. The walls are down. Say the real thing.',
+  fun:        'No overthinking. No filter. Just go.',
+};
+
+const D = {
+  marriage:[
+    {
+      id:'marriage-pulse', name:'Marriage Pulse', emoji:'💍',
+      desc:'Ask your spouse these before you assume everything is fine.',
+      bg:'#0E0B18', accent:'#7C3AED', hint:'No assumptions tonight',
+      cards:[
+        {q:"When did you last feel genuinely seen by me — not just heard, but truly seen?", hint:"Think carefully"},
+        {q:"What's something you've been carrying quietly that you haven't put into words yet?", hint:"Say it tonight"},
+        {q:"What's one thing you wish I understood about your daily world that I seem to miss?", hint:"Help me in"},
+        {q:"When you picture our marriage thriving, what does an ordinary Tuesday look like?", hint:"Paint it"},
+        {q:"What quality of mine do you most want our children to inherit?", hint:"Beautiful question"},
+        {q:"When did you last feel proud of who we are becoming together?", hint:"Name the moment"},
+        {q:"What's something I do naturally that makes you feel deeply loved — that I probably don't realise?", hint:"I want to do more of it"},
+        {q:"What season of our marriage has felt the most alive — and what made it that way?", hint:"Trace it"},
+        {q:"What's a hope for us that you haven't said out loud yet?", hint:"Say it now"},
+        {q:"What rhythm in our home brings you the most peace?", hint:"Notice what works"},
+        {q:"When you think about growing old with me, what makes you smile?", hint:"Go there together"},
+        {q:"What's something I've done recently that meant more to you than I knew?", hint:"Gratitude changes the room"},
+        {q:"What's a tradition you'd love for us to build together — even something small?", hint:"Start it tonight"},
+        {q:"What does it feel like when we're really in sync — what's different about those days?", hint:"Recreate it"},
+        {q:"What part of your life right now would feel lighter if we carried it together more?", hint:"Let me in"},
+        {q:"What do you most want me to understand about how you receive love — not how I give it?", hint:"Teach me"},
+        {q:"When did you last feel like we were genuinely on the same team — what were we doing?", hint:"Name it"},
+        {q:"What's one thing about our story that you never get tired of?", hint:"Tell it again"},
+        {q:"What's something about our marriage that you'd want to brag about?", hint:"Say it out loud"},
+        {q:"What does a fully flourishing version of us look like to you — practically, not poetically?", hint:"Dream it together"},
+        {q:"What's a dream you've had for our family that we haven't revisited in a while?", hint:"Revive it"},
+        {q:"What's the most generous thing I've done for you that you still think about?", hint:"Gratitude flows both ways"},
+        {q:"What do you appreciate about the way we parent together that we don't celebrate enough?", hint:"Celebrate it"},
+        {q:"What's one way I've grown that you've noticed and quietly appreciated?", hint:"Say it now"},
+        {q:"What makes you feel most at home when you're with me — what is it specifically?", hint:"That's the thing to protect"},
+        {q:"What's a prayer you have for our marriage in this specific season?", hint:"Share it"},
+        {q:"What's a belief you hold about us that keeps you hopeful on hard days?", hint:"Build on it"},
+        {q:"What's something you want us to experience together that we haven't yet?", hint:"Put it on the list"},
+        {q:"What does it feel like when our home is at its most peaceful — what has to be true for that?", hint:"What makes that happen?"},
+        {q:"What's one thing you'd love us to say yes to together before this year is over?", hint:"Dream out loud"},
+      ]
+    },
+    {
+      id:'marriage-repair', name:'Repair and Reconnect', emoji:'&#x1F30A;',
+      desc:'For couples who have been distant and want to find their way back.',
+      bg:'#180A10', accent:'#EC4899', hint:'Repair is an act of love',
+      cards:[
+        {q:"Is there something between us lately that you'd love for us to talk through — gently?", hint:"Open the door"},
+        {q:"What does it feel like when you know we're truly connected again after a hard stretch?", hint:"Name that feeling"},
+        {q:"What helps you feel safe enough to share something vulnerable with me?", hint:"Help me create that"},
+        {q:"What's one thing I could do this week that would help you feel more understood?", hint:"Teach me"},
+        {q:"When you're hurting, what do you most need from me — presence, words, or space?", hint:"Know each other"},
+        {q:"What's something you've wanted to say for a while that you haven't found the right moment for?", hint:"This is that moment"},
+        {q:"What helps you feel reconnected to me after we've been emotionally distant?", hint:"We can build that bridge"},
+        {q:"Is there something I've done that you'd like to understand better — not to reopen a wound, but to grow?", hint:"Curiosity heals"},
+        {q:"What does a soft landing look like for you after a hard conversation?", hint:"Give me the map"},
+        {q:"What would it feel like for both of us to walk into next week feeling fully reconciled?", hint:"Choose it together"},
+        {q:"What's something you've forgiven me for that I may not have fully received?", hint:"Let me receive it now"},
+        {q:"What's a way I can show up for you this week that says I'm choosing you — not just staying?", hint:"Make it intentional"},
+        {q:"What does a truly repaired and stronger version of us look like to you?", hint:"That's the goal"},
+        {q:"Is there an apology you'd love to receive that would genuinely close a chapter for you?", hint:"I want to give it"},
+        {q:"What do you need to hear from me right now to feel fully seen and loved?", hint:"Say it — I'm listening"},
+        {q:"What's something we can agree on right now that reminds us we're on the same side?", hint:"Find the common ground"},
+        {q:"What do you think we keep getting wrong in our arguments — and what would better look like?", hint:"Honest without blame"},
+        {q:"When I hurt you, what's the thing you most need me to understand — not just acknowledge?", hint:"Understanding is deeper than sorry"},
+        {q:"What does it feel like when I minimise something that was painful to you?", hint:"I want to stop that"},
+        {q:"What would it look like to choose joy and closeness as our default response to tension this month?", hint:"Practice it"},
+        {q:"What's a truth about me that you hold onto when things between us are hard?", hint:"That's our anchor"},
+        {q:"What's one thing you need from me that you've never directly asked for?", hint:"Ask — I want to give it"},
+        {q:"What area of our marriage do you feel we've been avoiding that deserves attention?", hint:"Name it gently"},
+        {q:"Is there something you're carrying from a past hurt that still quietly shows up between us?", hint:"Let's bring it into the light"},
+        {q:"What would it mean to you if I said I choose you again — fully, right now?", hint:"Then say it"},
+        {q:"What does emotional safety look like for you in our marriage — when do you feel it most?", hint:"Build more of that"},
+        {q:"What's something we could stop doing that's slowly creating distance between us?", hint:"Name it and let it go"},
+        {q:"What's one small act of love this week that would mean more than you could explain?", hint:"Do it — starting tonight"},
+        {q:"What's one commitment you want to make to this marriage tonight?", hint:"Say it out loud"},
+        {q:"What does it feel like to know I'm not going anywhere — even when it's hard?", hint:"That's the covenant"},
+      ]
+    },
+    {
+      id:'marriage-vision', name:'Our Vision', emoji:'🔮',
+      desc:'Couples who dream together build together. Start here.',
+      bg:'#080C18', accent:'#06B6D4', hint:'Dream together',
+      cards:[
+        {q:"What do you believe is the deeper purpose of our marriage beyond just the two of us?", hint:"Go big"},
+        {q:"What legacy do you most want us to leave for our children — not in words, in patterns?", hint:"Think generationally"},
+        {q:"What has God been speaking to you about us or our family lately that you haven't shared?", hint:"Share it"},
+        {q:"What would a fully aligned, purposeful marriage look like in practical day-to-day terms?", hint:"Be specific"},
+        {q:"What are we currently building together — and does it actually reflect what we both want?", hint:"Honest check"},
+        {q:"What's a God-given dream you believe we're meant to fulfil together that we haven't named?", hint:"Declare it"},
+        {q:"What kind of home do you want people to feel when they walk through our door?", hint:"Culture is intentional"},
+        {q:"What does financial freedom look like for our family — and are we building toward the same picture?", hint:"Get on the same page"},
+        {q:"What kind of parents do we want to be known as — and are we becoming them?", hint:"Course-correct if needed"},
+        {q:"What community or church involvement do you want our family to be rooted in?", hint:"Roots matter"},
+        {q:"What does a spiritually healthy household look like to you, practically?", hint:"Build it intentionally"},
+        {q:"What's one area where you feel God is calling us to step out in faith together?", hint:"Say yes"},
+        {q:"What's a project, ministry, or cause you'd love for us to invest in as a couple?", hint:"Give it direction"},
+        {q:"What would you want someone to say about our marriage at our 50th anniversary?", hint:"Live toward it"},
+        {q:"What's something we're currently believing God for as a family?", hint:"Agree together"},
+        {q:"What values do you most want to be the cornerstone of our household?", hint:"Name them"},
+        {q:"What does success in our marriage look like to you — not the world's version, yours?", hint:"Define it together"},
+        {q:"What area of our lives do you feel needs the most intentionality right now?", hint:"Name it and move"},
+        {q:"What prayer are you carrying for our family that you haven't said out loud?", hint:"Pray it together"},
+        {q:"What's a word or phrase you'd want to describe our home in every season?", hint:"Set the culture"},
+        {q:"What's one step we could take this month toward the vision we have for our family?", hint:"Make it real"},
+        {q:"Who are the couples you most want to learn from — and what are they doing right?", hint:"Glean from them"},
+        {q:"What kind of marriage do you want our children to see modelled every single day?", hint:"They're watching"},
+        {q:"What does thriving look like for us — not just surviving, not just managing, but genuinely thriving?", hint:"Name it"},
+        {q:"What's the one thing you'd want us to say yes to together if fear wasn't a factor?", hint:"Say yes"},
+        {q:"What's something we've talked about building that we've been putting off — and why?", hint:"Revisit it tonight"},
+        {q:"What does your ideal version of our family culture look like five years from now?", hint:"Paint it in detail"},
+        {q:"What's a mentorship or community investment you want our family to be known for?", hint:"Generosity is a legacy"},
+        {q:"What area of your personal calling do you feel our marriage either supports or competes with?", hint:"Align your assignments"},
+        {q:"What's a declaration you want to make over our marriage tonight — in faith, not in feeling?", hint:"Declare it together"},
+      ]
+    },
+    {
+      id:'marriage-groom', name:'Help Each Other Become', emoji:'🌱',
+      desc:'The best spouses see who you are becoming — and help you get there.',
+      bg:'#081808', accent:'#22C55E', hint:'Tend each other like a garden',
+      cards:[
+        {q:"When you picture the fullest version of who I could become — what does that person look like?", hint:"Tell me your vision of me"},
+        {q:"What gift or capacity in me do you think is the most underdeveloped right now?", hint:"Say it with love"},
+        {q:"What kind of mentor, community, or resource do you think I need in this season?", hint:"Be specific"},
+        {q:"Is there a dream I've shared that you haven't fully supported yet — and why?", hint:"Honest check"},
+        {q:"What's something about my daily environment that you think is limiting my growth?", hint:"I want to hear this"},
+        {q:"What's a course, book, or experience you'd invest in for me if money wasn't a factor?", hint:"Think big"},
+        {q:"What's something you see in me that I consistently underestimate about myself?", hint:"Speak life over me"},
+        {q:"How can I create more space for you to become who you're called to be?", hint:"This is service"},
+        {q:"What's a goal of mine you could support more actively — and how would that look?", hint:"Partnership in purpose"},
+        {q:"What does it feel like when I believe in you more than you believe in yourself?", hint:"I want to do that more"},
+        {q:"What would it look like for us to reverse-engineer each other's best future?", hint:"Build backward from the vision"},
+        {q:"What's an area where you feel I've been pruning you instead of nourishing you?", hint:"I want to stop that"},
+        {q:"What's something you've been wanting to pursue but haven't felt my full support on?", hint:"Tell me — I want to give it"},
+        {q:"What kind of leadership do you need from me in this season?", hint:"Ask for it directly"},
+        {q:"What's a strength in you that I take for granted instead of actively celebrating?", hint:"I'll celebrate it"},
+        {q:"If I were to invest in your growth the way a great mentor would, what would I do first?", hint:"Tell me and I'll do it"},
+        {q:"What's a pattern in my life that you think is competing with my purpose?", hint:"Say it with grace"},
+        {q:"What does it feel like when I speak to your future self — not just who you are now?", hint:"That's vision-love"},
+        {q:"What connection or relationship do you feel you're missing that would accelerate your growth?", hint:"I'll help you find it"},
+        {q:"What would it look like for us to be each other's greatest advocates this season?", hint:"Commit to it tonight"},
+        {q:"What dream have you quietly put down that deserves to be picked back up?", hint:"I'll help you carry it"},
+        {q:"What's a version of yourself you've been afraid to show me — that I'd actually love?", hint:"Show me"},
+        {q:"What would our marriage look like if we both operated from our fullest potential?", hint:"Live toward that"},
+        {q:"What's something you need me to stop doing that's slowing down your becoming?", hint:"I want to know"},
+        {q:"What's one investment in yourself you've been putting off that I can help make possible?", hint:"Let me be part of it"},
+        {q:"What kind of home environment helps you think most clearly and create most freely?", hint:"I'll build that for you"},
+        {q:"What does it mean to you when I connect you with someone who can help you grow?", hint:"Relationships are resources"},
+        {q:"What's a calling on your life that you feel our marriage hasn't fully made room for yet?", hint:"Let's make room"},
+        {q:"What would it look like if I treated your destiny as seriously as I treat my own?", hint:"That's husbandry"},
+        {q:"What's the most important thing I can do right now to help you become who you're meant to be?", hint:"This is the marriage question"},
+      ]
+    },
+    {
+      id:'marriage-friendship', name:'Best Friends', emoji:'🤝',
+      desc:'The best marriages are built on deep friendship. Explore yours.',
+      bg:'#080E18', accent:'#38BDF8', hint:'Friendship is the foundation',
+      cards:[
+        {q:"What's something I do that still makes you laugh after all this time?", hint:"Laugh about it"},
+        {q:"What's an inside joke or memory between us that you hope we never forget?", hint:"Bring it back"},
+        {q:"When do you feel most like we're genuinely best friends — what are we usually doing?", hint:"What makes that true?"},
+        {q:"What's something you'd tell your best friend about me that you've never said to my face?", hint:"Say it now"},
+        {q:"What's a topic we could talk about for hours and still not run out of things to say?", hint:"Go there"},
+        {q:"What's something you've discovered about me recently that made you smile?", hint:"Awareness is love"},
+        {q:"What's your favourite ordinary memory of us — something simple that you quietly treasure?", hint:"The small things"},
+        {q:"What's something you love doing with me that has nothing to do with being married?", hint:"Just us as people"},
+        {q:"What do I do that shows you I know you deeply — not just love you in a general way?", hint:"That's real intimacy"},
+        {q:"What's a new interest of yours you'd love for me to step into with you?", hint:"Invite me"},
+        {q:"What's something we could be more playful and lighthearted about together?", hint:"Life needs more of this"},
+        {q:"What's a habit of mine that you've grown to find endearing rather than annoying?", hint:"The small quirks"},
+        {q:"What's something that still excites you about spending time with just me?", hint:"Hold onto it"},
+        {q:"What's a shared value we have that you feel most proud of?", hint:"Name it"},
+        {q:"What's the most fun we've had together in the last year — and why haven't we repeated it?", hint:"Do it again"},
+        {q:"What's something you want to learn or try together that we haven't gotten around to?", hint:"New experiences bond"},
+        {q:"What's the first thing you want to tell me when something good happens in your day?", hint:"I want to be that person"},
+        {q:"What's something about our friendship that you think is genuinely rare?", hint:"Celebrate it"},
+        {q:"What's something I do that makes hard days easier just by being present?", hint:"You matter"},
+        {q:"What's a quality in me as a friend — not just as a spouse — that you genuinely love?", hint:"Name it"},
+        {q:"What do you think makes us a great team that not every couple has?", hint:"Declare it"},
+        {q:"What's something silly or fun we should do together soon that we keep saying we will?", hint:"Put it on the calendar"},
+        {q:"What's a memory that always comes to mind when you think about how happy you've been with me?", hint:"Tell me"},
+        {q:"What's something you appreciate about how I support you that doesn't get said enough?", hint:"Say it now"},
+        {q:"What's one thing I do that makes you feel like you married exactly the right person?", hint:"The best question"},
+        {q:"What's a season of our friendship you'd want to revisit?", hint:"Go back there"},
+        {q:"What do you love about how we handle silence together?", hint:"Comfort in the quiet"},
+        {q:"What's something I've done that you bragged about to someone else?", hint:"Tell me"},
+        {q:"What quality in me as a companion do you want more of?", hint:"I'll lean in"},
+        {q:"What's something about being with me that never gets old?", hint:"Name the gift"},
+      ]
+    },
+  ],
+
+  courtship:[
+    {
+      id:'courtship-core', name:'Before You Say Yes', emoji:'💎',
+      desc:'Questions to ask your courtship partner before commitment.',
+      bg:'#120A18', accent:'#8B5CF6', hint:'Know before you commit',
+      cards:[
+        {q:"How do you handle disagreement when you're fully convinced you're right?", hint:"Watch the posture"},
+        {q:"What does a spiritually led home look like to you in day-to-day life — not just in theory?", hint:"Details matter"},
+        {q:"What are you actively working on about yourself right now — and who's holding you accountable?", hint:"Growth-minded people build better homes"},
+        {q:"What's your relationship with money — how do you save, give, and make big financial decisions?", hint:"Talk about it now"},
+        {q:"What does it feel like when you're fully safe with someone — what does that safety require of them?", hint:"Can you describe it?"},
+        {q:"What's a pattern from your home growing up that you want to bring into ours?", hint:"Legacy is built intentionally"},
+        {q:"What's a pattern from your home growing up that you've decided to consciously do differently?", hint:"Self-awareness is powerful"},
+        {q:"How do you feel about the pace we're moving at — does it feel God-led to you?", hint:"Check in"},
+        {q:"What do you believe God is building in you for this next season — and does this relationship support that?", hint:"Vision matters"},
+        {q:"What's something about me that you genuinely admire — beyond chemistry and how I make you feel?", hint:"Character over chemistry"},
+        {q:"How do you handle stress — and what do you need from a partner when you're in the middle of it?", hint:"Know this before you commit"},
+        {q:"What's a conviction you hold that you would not compromise — even for someone you love deeply?", hint:"Non-negotiables are healthy"},
+        {q:"What does loyalty mean to you practically — not in definition but in daily life?", hint:"Define it together"},
+        {q:"Who are the people in your life who have the authority to speak hard truth to you?", hint:"Accountability is attractive"},
+        {q:"What does a thriving family culture feel like to you when you walk through the door?", hint:"You're building this"},
+        {q:"How do you want to handle finances together — joint, separate, or a combination?", hint:"Practical but important"},
+        {q:"What does extended family involvement look like in your ideal home?", hint:"Boundaries protect love"},
+        {q:"What are your expectations around children — timing, number, and how you'd raise them?", hint:"Align before you commit"},
+        {q:"What does a healthy argument look like between two people — and how do you know when it's resolved?", hint:"Process matters"},
+        {q:"What gift do you bring to a relationship that you want me to know about and honour?", hint:"Own your strengths"},
+        {q:"What have you observed in our dynamic so far that excites you about what we could build?", hint:"Share the hope"},
+        {q:"What do you need from me to feel genuinely chosen — not just loved in a general sense?", hint:"Specific love lands deeper"},
+        {q:"What's your approach to church, community, and spiritual accountability as a couple?", hint:"Roots together"},
+        {q:"What have you learned about yourself from your past that makes you better prepared for this?", hint:"Growth is beautiful"},
+        {q:"What's one thing you want to say yes to together before this courtship moves forward?", hint:"Decide it now"},
+        {q:"Am I pursuing you because I genuinely see a future with you — or because you make me feel good right now?", hint:"Honest question for both of you"},
+        {q:"What's something you've never told a partner before that you feel safe enough to tell me?", hint:"Vulnerability builds trust"},
+        {q:"What does spiritual leadership look like in a relationship to you — and what does it not look like?", hint:"Define it clearly"},
+        {q:"What's something about your future that you feel this relationship either supports or complicates?", hint:"Alignment matters"},
+        {q:"If we were to get married, what's the one thing you'd want me to always remember about who you are?", hint:"This is your core identity"},
+      ]
+    },
+    {
+      id:'courtship-character', name:'Character Check', emoji:'🎯',
+      desc:'These questions reveal what you most need to see before committing.',
+      bg:'#180C05', accent:'#F97316', hint:'Character over chemistry',
+      cards:[
+        {q:"Tell me about a time you were completely wrong about something important — how did you handle it?", hint:"Accountability is attractive"},
+        {q:"Who has the permission to correct you — and how do you genuinely respond when they do?", hint:"Do they have healthy community?"},
+        {q:"What's something you're intentionally working on about your own character right now?", hint:"Self-awareness is powerful"},
+        {q:"How do you respond when life gets hard and things don't go the way you planned?", hint:"Pressure shows character"},
+        {q:"What does your closest friend genuinely celebrate about you — not what you celebrate about yourself?", hint:"Others see what we can't"},
+        {q:"What's a value or standard you hold that the people around you might not understand or share?", hint:"Convictions are attractive"},
+        {q:"When have you had to choose integrity even when it cost you something real?", hint:"Integrity under pressure"},
+        {q:"How do you handle apology and forgiveness — do you give it freely or is it a process for you?", hint:"This is your future conflict style"},
+        {q:"What's something you believe about relationships that most people in your circle disagree with?", hint:"Convictions over crowd"},
+        {q:"How do you talk about people when they're not in the room — and has that changed as you've grown?", hint:"Character is consistent"},
+        {q:"What does humility look like in your day-to-day life — not just in your values?", hint:"Not just in concept"},
+        {q:"What's the hardest decision you've ever made — and what guided you through it?", hint:"Values under pressure"},
+        {q:"How do you respond to criticism — and has that changed over time?", hint:"Growth-oriented?"},
+        {q:"What do people who know you well say is your greatest strength — and your greatest blind spot?", hint:"Own both"},
+        {q:"What area of your life are you most intentional about protecting and investing in right now?", hint:"Priorities are visible"},
+        {q:"How do you treat people who can do nothing for you?", hint:"This is the real test"},
+        {q:"What does servanthood look like practically in your daily life — give me an example?", hint:"Love is action"},
+        {q:"What's something you used to believe that you've genuinely grown out of — and what changed?", hint:"Growth is beautiful"},
+        {q:"How do you handle temptation — what's your honest strategy when you're in a hard moment?", hint:"Honest answer only"},
+        {q:"What's the most courageous thing you've done — and what drove you to do it?", hint:"Courage points to values"},
+        {q:"What does honour look like to you — toward God, your family, and the people around you?", hint:"It's a lifestyle"},
+        {q:"How do people who've known you the longest describe who you've become?", hint:"Legacy in progress"},
+        {q:"What have you had to forgive someone for — and how did that shape your character?", hint:"Forgiveness is a character muscle"},
+        {q:"What's something you take seriously that others around you tend to treat casually?", hint:"Convictions matter"},
+        {q:"What kind of person do you want to be known as in 20 years — and are you becoming them now?", hint:"Are you becoming them now?"},
+        {q:"What does it mean to you to be a person of your word — and when has that cost you something?", hint:"Integrity in practice"},
+        {q:"What's something about your relationship with God right now that a partner would need to understand?", hint:"Faith shapes everything"},
+        {q:"How do you handle it when someone you love disappoints you significantly?", hint:"Grace and accountability"},
+        {q:"What does generosity look like in your everyday life — not just with money?", hint:"Generosity is a character trait"},
+        {q:"What's a habit you've built that shows who you're committed to becoming?", hint:"We become our habits"},
+      ]
+    },
+    {
+      id:'courtship-talking', name:'Moving with Direction', emoji:'🧭',
+      desc:'For talking stages moving with flow but no clear direction.',
+      bg:'#180A05', accent:'#FB923C', hint:'Vibes are not a direction',
+      cards:[
+        {q:"Are we building toward something — or are we just enjoying the moment?", hint:"The question that changes everything"},
+        {q:"What would make you walk away from this — and have you seen any of it yet?", hint:"Dealbreakers save you years"},
+        {q:"How serious is this to you — and when did it start feeling that way?", hint:"Name it out loud"},
+        {q:"What does your closest person think about where this is going?", hint:"Your community sees things you don't"},
+        {q:"What would have to be true about me for you to fully commit?", hint:"Know the standard"},
+        {q:"What are you most afraid of finding out about me as this gets more serious?", hint:"The fear points to the need"},
+        {q:"What do you think this is — in your own honest words, not the official version?", hint:"Define before you deepen"},
+        {q:"What's something about yourself that you haven't shown me yet that I'd need to see?", hint:"Authenticity builds trust"},
+        {q:"What would it take for you to feel ready to have a real conversation about where this is going?", hint:"Name the conditions"},
+        {q:"Do you feel like this has a direction — or does it feel like we're figuring it out as we go?", hint:"Honest answer"},
+        {q:"What's one expectation you have about this that you've never said out loud?", hint:"Unstated expectations hurt people"},
+        {q:"What does the person you want to marry look like — and am I close to that?", hint:"No right or wrong answer"},
+        {q:"Is there someone from your past that this situation is bringing up — and how does that affect things?", hint:"Awareness protects you both"},
+        {q:"What's the most honest thing you could say about how you feel about me right now?", hint:"No performance"},
+        {q:"Are you looking for something serious — or are you still figuring that out?", hint:"Fair question to ask"},
+        {q:"What's something about how we interact that has surprised you?", hint:"Surprises are information"},
+        {q:"What would you want me to know about how you've been hurt before — so that I can be different?", hint:"The past matters here"},
+        {q:"What does a relationship that's heading somewhere healthy feel like to you?", hint:"Compare that to this"},
+        {q:"Is there a version of yourself you feel you can't be around me yet — and why?", hint:"What creates that distance?"},
+        {q:"What do you want this to become — and are you willing to say that out loud right now?", hint:"Clarity is kind"},
+        {q:"What's something I've done that made you think this could really be something?", hint:"Name it"},
+        {q:"What's something you need in a relationship that you're not sure this has yet?", hint:"Honest needs"},
+        {q:"What would you regret not asking before things got more serious?", hint:"Ask it now"},
+        {q:"What does intentional look like to you — and does this feel intentional?", hint:"Direction over drift"},
+        {q:"What's one thing you want us to decide together before we go any further?", hint:"One clear yes or no"},
+        {q:"What does trust look like in early stages of something like this — and do you feel it?", hint:"Trust is earned in stages"},
+        {q:"What are you hoping this becomes — and what are you afraid it might not be?", hint:"Both truths can coexist"},
+        {q:"If someone asked you what this is, what would you say?", hint:"Your answer tells you everything"},
+        {q:"What's one conversation we need to have before this goes to the next level?", hint:"Have it tonight"},
+        {q:"What's something about yourself that has changed through being around me — good or bad?", hint:"Relationships reveal us"},
+      ]
+    },
+    {
+      id:'courtship-growth', name:'Growing Together', emoji:'🌱',
+      desc:'Questions that reveal how you grow — and whether you will grow together.',
+      bg:'#080C0A', accent:'#34D399', hint:'Growth is the journey',
+      cards:[
+        {q:"What's something God has been teaching you personally in this season — and does this relationship support that?", hint:"Share the process"},
+        {q:"How do you like to grow — books, community, mentorship, experience, or solitude?", hint:"Know each other's methods"},
+        {q:"What's a dream or calling you're actively investing in right now?", hint:"Support starts with understanding"},
+        {q:"What does accountability look like in your personal life today — not in theory?", hint:"Healthy people have accountability"},
+        {q:"How do you respond when the person you love challenges you to grow in an uncomfortable way?", hint:"Important question"},
+        {q:"What's something you were certain about a year ago that you now see completely differently?", hint:"Growth requires humility"},
+        {q:"What does your prayer life actually look like — not the ideal version, the real one?", hint:"Honesty builds trust"},
+        {q:"What's something you're believing God for in this season that requires real faith?", hint:"Faith is personal and shared"},
+        {q:"What's a discipline or habit that has shaped you more than anything else?", hint:"Know their foundation"},
+        {q:"Who are you intentionally learning from right now — and why did you choose them?", hint:"Mentorship reveals values"},
+        {q:"What does it feel like when someone invests in your growth — and how do you receive that?", hint:"Receiving is a skill too"},
+        {q:"What's a fear you've been actively working to overcome — and what's helped?", hint:"Courage is growth"},
+        {q:"What has loving me so far taught you about yourself?", hint:"Beautiful and revealing"},
+        {q:"What's something you want to grow into in the next two years — specifically?", hint:"Vision with a timeline"},
+        {q:"What's something you need from me to grow well in this relationship?", hint:"Ask for it directly"},
+        {q:"What area of life do you feel God is currently expanding your capacity in?", hint:"Growth has seasons"},
+        {q:"What's something that used to limit you that you've genuinely moved past?", hint:"Celebrate the progress"},
+        {q:"What's the most important lesson love has taught you — from any relationship?", hint:"Let it shape you"},
+        {q:"What kind of legacy are you building with your individual life right now — before us?", hint:"Individual purpose matters"},
+        {q:"What makes you feel most alive and purposeful in a given week?", hint:"Know what fuels them"},
+        {q:"What area of your faith are you currently pressing into most deeply?", hint:"Spiritual growth direction"},
+        {q:"What's a version of yourself you haven't reached yet that you're actively moving toward?", hint:"Becoming is ongoing"},
+        {q:"What's something about how I've challenged you in a good way?", hint:"Growth through relationship"},
+        {q:"What habit or belief do you want to build into a future home that you're cultivating now?", hint:"Now is the preparation"},
+        {q:"What community investment are you making that shapes who you're becoming?", hint:"We become who we surround ourselves with"},
+        {q:"What's something about your character right now that you're most proud of?", hint:"Own it without apology"},
+        {q:"What area of emotional health have you done the most work in — and how?", hint:"EQ is attractive"},
+        {q:"What does it look like when you're at your healthiest — emotionally, spiritually, physically?", hint:"Know what flourishing looks like"},
+        {q:"What's a belief you're building your future on that you'd want a partner to share?", hint:"Foundations matter"},
+        {q:"What's something you want us to grow in together if this becomes what we hope it will?", hint:"Shared intention"},
+      ]
+    },
+  ],
+  couples:[
+    {
+      id:'couples-connect', name:'Deep Connection', emoji:'🔗',
+      desc:'Questions that take you from surface to soul.',
+      bg:'#180A0E', accent:'#F43F5E', hint:'Look them in the eyes',
+      cards:[
+        {q:"What's something about me you've never fully understood but have always been curious about?", hint:"Ask it now"},
+        {q:"When do you feel most loved by me — and when do you feel most lit up by what we have?", hint:"Tell me both"},
+        {q:"What moment between us would you press replay on if you could?", hint:"Close your eyes"},
+        {q:"Is there something you've been wanting to share with me but haven't found the words for?", hint:"This is that moment"},
+        {q:"What does this relationship give you that nothing else in your life does?", hint:"Name it out loud"},
+        {q:"What's something I do that makes you feel like yourself — fully, freely yourself?", hint:"That's home"},
+        {q:"What do you think makes us different from most couples?", hint:"Celebrate that"},
+        {q:"What's something about our connection that still surprises you?", hint:"The unexpected is the gift"},
+        {q:"What feeling do you most associate with being with me?", hint:"One word or a sentence"},
+        {q:"What's something you've learned about yourself through being with me?", hint:"Relationships reveal us"},
+        {q:"What do you love most about the way we communicate when we're at our best?", hint:"Recreate that"},
+        {q:"What's something you've always wanted to ask me but held back — and can you ask it now?", hint:"Ask it now"},
+        {q:"What's a part of yourself you feel you can fully express around me that you can't elsewhere?", hint:"That's rare — don't take it for granted"},
+        {q:"What's something you've noticed about me recently that made you feel close to me?", hint:"Say it"},
+        {q:"What does it look like when we're absolutely in sync — and what brings that about?", hint:"Recreate it intentionally"},
+        {q:"What's a memory of us that still gives you that warm feeling in your chest?", hint:"Tell me"},
+        {q:"What makes you feel most understood by me — and when do I do it best?", hint:"Do more of that"},
+        {q:"What's something you appreciate about how I handle things that you've never told me?", hint:"Say it now"},
+        {q:"What does it feel like when you know I'm fully present with you — not just physically?", hint:"I want to give you more of that"},
+        {q:"What's one thing you want more of between us — and have you ever said that directly?", hint:"Ask for it — I want to give it"},
+        {q:"What quality of mine do you find yourself bragging about to people?", hint:"Tell me"},
+        {q:"What does it mean to you to feel chosen by me — not just loved but actively chosen?", hint:"I choose you"},
+        {q:"What makes you feel safest with me — what specifically creates that?", hint:"I want to protect that"},
+        {q:"What's something about where we're going together that genuinely excites you?", hint:"Dream out loud"},
+        {q:"What's one thing you want us to be intentional about as a couple in this season?", hint:"Let's decide together"},
+        {q:"What's a way I show up for you that you think I don't realise how much it matters?", hint:"I want to know"},
+        {q:"What do you love about how we handle things when they're genuinely hard?", hint:"Acknowledge your resilience"},
+        {q:"What's a version of us you want to grow into that we're not fully there yet?", hint:"The becoming is beautiful"},
+        {q:"What would you say to someone who asked you what makes this relationship worth it?", hint:"Say it to me instead"},
+        {q:"What's something about loving you that has surprised me in the best way?", hint:"I want to name it"},
+      ]
+    },
+    {
+      id:'couples-argument', name:'After the Argument', emoji:'🌧️',
+      desc:'For when one of you doesn\'t fully see the gravity of what happened.',
+      bg:'#180A14', accent:'#E879A0', hint:'The argument is not over until both of you are okay',
+      cards:[
+        {q:"Have I actually tried to understand what I did — or have I just been waiting for you to get over it?", hint:"Sit with that question"},
+        {q:"If the roles were reversed and you did to me exactly what I did to you — would I call it serious?", hint:"Most people go quiet here"},
+        {q:"What was the thing I said or did that hurt the most — not what started it, what landed hardest?", hint:"The impact matters more than the intent"},
+        {q:"What do you wish I had done in that moment instead of what I actually did?", hint:"I want to know the right response"},
+        {q:"Did you feel like I genuinely heard you during that argument — or like I was just waiting to respond?", hint:"Listening and hearing are different"},
+        {q:"What's still unresolved for you that I may have assumed was closed?", hint:"Some doors don't close that easily"},
+        {q:"When I said sorry, did it feel like I understood — or did it feel like I wanted the tension to end?", hint:"Apologies need understanding behind them"},
+        {q:"What's something that's been sitting in you since that argument that you haven't said yet?", hint:"I'm ready to hear it"},
+        {q:"Is there something I minimised that was actually a big deal to you?", hint:"I want to see the full weight of it"},
+        {q:"What do you need from me right now — not to fix it, just to feel less alone in it?", hint:"Presence before solutions"},
+        {q:"What does it feel like when I move on before you've had time to process?", hint:"Pace matters"},
+        {q:"What would a real apology look like to you — not just the words, but what it would include?", hint:"Teach me what you need"},
+        {q:"What am I missing about how that affected you — what part don't I fully see yet?", hint:"Curiosity heals"},
+        {q:"Do you feel like I take your pain seriously — or like you have to convince me that it was real?", hint:"You shouldn't have to fight to be believed"},
+        {q:"What would it take for you to feel like we've actually resolved this — not just moved past it?", hint:"Resolution is more than peace"},
+        {q:"What did you need from me in that moment that I didn't give you?", hint:"I want to do better next time"},
+        {q:"Is there a pattern in how I handle conflict that keeps showing up — that you've been hoping I'd notice?", hint:"Patterns speak louder than incidents"},
+        {q:"What does it feel like to be on the receiving end of me when I'm defensive?", hint:"I need to know my impact"},
+        {q:"What do I do that makes it hard for you to come to me when something's wrong?", hint:"I want to remove those barriers"},
+        {q:"What's something about this argument that you want me to remember the next time things get tense?", hint:"Carry the lesson forward"},
+        {q:"Do you feel like I see you as someone to win against in conflict — or someone to win with?", hint:"That's a critical question"},
+        {q:"What's the most loving thing I could do for you right now — even if the argument isn't fully resolved?", hint:"Love in the middle of hard"},
+        {q:"What would it mean to you if I initiated understanding rather than waiting for you to explain?", hint:"Curiosity is a love language"},
+        {q:"Is there something you've been carrying from past arguments that showed up in this one?", hint:"Old wounds can be reopened"},
+        {q:"What do you most want me to know about what goes on inside you during a conflict between us?", hint:"Teach me your inner world"},
+        {q:"What does it feel like when I finally fully understand — not when I apologise, but when I genuinely get it?", hint:"That moment matters"},
+        {q:"What would help you trust that this kind of argument won't keep happening?", hint:"Change is demonstrated not promised"},
+        {q:"What's something about how we handled this that you actually think we did right?", hint:"Find the small win too"},
+        {q:"What's a commitment you want from me coming out of this — something specific?", hint:"I want to make it"},
+        {q:"What would it feel like to know that I'd never make you feel that way again?", hint:"Let's build toward that"},
+      ]
+    },
+    {
+      id:'couples-lovelang', name:'Love Language', emoji:'💝',
+      desc:'How do you really feel loved — and how do I show up for you?',
+      bg:'#180510', accent:'#EC4899', hint:'Speak your truth',
+      cards:[
+        {q:"What do I do — even without realising it — that makes you feel deeply loved?", hint:"The small things count"},
+        {q:"What do you wish I did more of to show you I care — specifically?", hint:"A real request"},
+        {q:"When was the last time you felt genuinely appreciated by me — and what did I do?", hint:"I want to repeat it"},
+        {q:"What's something I stopped doing that you quietly miss?", hint:"Let me know"},
+        {q:"How do you know when I'm proud of you — do you always feel it clearly?", hint:"Let's close that gap"},
+        {q:"What would it look like for me to love you really well this week specifically?", hint:"Specific love lands"},
+        {q:"When do you feel most connected to me — what are we usually doing?", hint:"Let's do more of that"},
+        {q:"What does it mean to you when I prioritise you over everything else pulling at me?", hint:"That's my yes to you"},
+        {q:"What does it feel like when I celebrate you — do you receive it fully?", hint:"Let yourself be celebrated"},
+        {q:"What's something I say that makes you feel seen — not just heard?", hint:"I'll say it more"},
+        {q:"What's a way I show love that doesn't always land the way I intend it?", hint:"Help me do better"},
+        {q:"What does it feel like when you know I'm thinking about you when we're apart?", hint:"I think about you more than you know"},
+        {q:"What do you need from me on your hard days — presence, practical help, or quiet space?", hint:"Teach me your language"},
+        {q:"What's something I could do this week that would feel like a real gift?", hint:"Ask and receive"},
+        {q:"What makes you feel like you're my priority — not just in my words but in my actions?", hint:"Actions speak"},
+        {q:"What does it mean to you to be truly known — not just loved in a general way?", hint:"Deep love is specific"},
+        {q:"What's the most meaningful thing anyone has ever done for you to show they love you?", hint:"Tell me so I can give you that"},
+        {q:"What's something I do that communicates love in a language you actually receive?", hint:"Keep doing that"},
+        {q:"How do you feel most honoured by me — in private, in public, or both?", hint:"I want to honour you well"},
+        {q:"What would it feel like for you to be loved at the fullest level you can imagine?", hint:"Let yourself dream it"},
+        {q:"What makes you feel like I'm truly invested in you — not just in us?", hint:"You as an individual"},
+        {q:"What do you need to feel emotionally safe enough to be fully yourself with me?", hint:"I want to create that space"},
+        {q:"What's one way you want to grow in how you love me?", hint:"We both grow"},
+        {q:"What's something about the way I love you that you want us to always protect?", hint:"Name it so we can guard it"},
+        {q:"When do you feel most fought for by me?", hint:"I want to do that more"},
+        {q:"What does emotional intimacy feel like to you — when do we have it?", hint:"Define it together"},
+        {q:"What's something you've never asked me for that you've always wanted?", hint:"Ask now"},
+        {q:"What does it look like when I love you well through a hard season?", hint:"That's what I want to give you"},
+        {q:"What's the version of me that you feel most loved by?", hint:"I want to be that person consistently"},
+        {q:"What would it mean to you to feel pursued by me — even now, even still?", hint:"I still choose you"},
+      ]
+    },
+    {
+      id:'couples-future', name:'Future Together', emoji:'🌟',
+      desc:'Dream out loud — where are you both headed?',
+      bg:'#080E18', accent:'#818CF8', hint:'Dream out loud',
+      cards:[
+        {q:"What's one thing you want us to build or create together in the next year?", hint:"Make it real"},
+        {q:"Where do you see us in 10 years — paint me the actual picture, not the summary?", hint:"Be specific"},
+        {q:"What adventure do you most want us to say yes to before life gets any busier?", hint:"Put it on the calendar"},
+        {q:"What's something we've never done together that you want to do before the year is over?", hint:"Add it to the list"},
+        {q:"If we could design our life together with no limitations, what would it actually look like?", hint:"No limits"},
+        {q:"What's a shared goal we have that we haven't revisited in a while?", hint:"Revisit it"},
+        {q:"What kind of people do you want us to become together — not just individually?", hint:"Shared identity"},
+        {q:"What's something you want to invest in as a couple this season — time, money, or energy?", hint:"Choose intentionally"},
+        {q:"What's a cause or mission you'd love for us to be part of together?", hint:"Purpose beyond just us"},
+        {q:"What does financial health and freedom look like for us — and are we moving toward the same picture?", hint:"Align your plans"},
+        {q:"What are you most looking forward to about our next chapter together?", hint:"Anticipation is a gift"},
+        {q:"What kind of friendships do you want us to cultivate together?", hint:"Community shapes you"},
+        {q:"What does a peaceful, deeply satisfying home life look like to you — in the details?", hint:"Build toward it"},
+        {q:"What's something you want our relationship to model for people around us?", hint:"Your love is a witness"},
+        {q:"What's one thing you want us to be more intentional about that we've been drifting on?", hint:"Name it and move"},
+        {q:"What version of yourself do you want to step into — and how can I support that becoming?", hint:"I'm your biggest fan"},
+        {q:"What's something you want to learn or experience together that we haven't yet?", hint:"New things bond"},
+        {q:"What would it look like for us to invest in each other's individual dreams more this year?", hint:"Champion each other"},
+        {q:"What's something you believe we're capable of together that we haven't attempted yet?", hint:"It's time"},
+        {q:"What's a prayer or hope you have for our future that you haven't put into words yet?", hint:"Say it out loud"},
+        {q:"What's one area of life where you want us to grow in unity this year?", hint:"Intentional alignment"},
+        {q:"What does rest and simplicity look like for us — and are we building toward it?", hint:"Peace is a design choice"},
+        {q:"What does it mean to you to build something that outlasts us?", hint:"Legacy thinking"},
+        {q:"What's something about our future that you're quietly excited about?", hint:"Let it out"},
+        {q:"What would it look like for us to be each other's greatest investment?", hint:"Return on love"},
+      ]
+    },
+  ],
+
+  longdist:[
+    {
+      id:'longdist-call', name:"Tonight's Call", emoji:'📱',
+      desc:'Questions that make the distance disappear — ask these tonight.',
+      bg:'#080C18', accent:'#6366F1', hint:'Make this call count',
+      cards:[
+        {q:"What happened today that you couldn't wait to tell me?", hint:"The small things matter most"},
+        {q:"What's something you've been thinking about me recently that you haven't said?", hint:"Say it tonight"},
+        {q:"What do you wish I could have been there for this week?", hint:"I want to know your world"},
+        {q:"What's something happening in your life right now that you want me to understand more deeply?", hint:"Let me in"},
+        {q:"What do you miss most about being in the same space as me — be specific?", hint:"Hold that feeling"},
+        {q:"When you picture the moment we're finally in the same room again, what happens?", hint:"Picture it together"},
+        {q:"What's something you've been doing alone lately that you'd love to do with me?", hint:"I'll do it with you soon"},
+        {q:"What's a memory of us you've been replaying lately?", hint:"Tell me"},
+        {q:"What are you most excited to show me or share with me when we're finally together?", hint:"Anticipation is a bridge"},
+        {q:"What part of your day do you miss me most — and what triggers it?", hint:"I'll be thinking about you then"},
+        {q:"What's something you've learned about yourself during this season of distance?", hint:"Growth is happening"},
+        {q:"What would make this season apart feel more meaningful or purposeful to you?", hint:"Let's name it"},
+        {q:"What's one thing you want to do the moment we're together again?", hint:"It's closer than it feels"},
+        {q:"What's something you want me to know about how you're really doing — not the version you share publicly?", hint:"I'm here — fully"},
+        {q:"What's a dream or goal you're working on right now that you want me to be part of cheering for?", hint:"I want to celebrate with you"},
+        {q:"What's something that made you smile or feel grateful today?", hint:"Joy shared is joy doubled"},
+        {q:"What's been the hardest part of this week — and what helped you get through it?", hint:"I want to carry that with you"},
+        {q:"What do you feel most hopeful about for us right now?", hint:"Hope is a lifeline"},
+        {q:"What would it look like for us to grow closer during this season rather than just endure it?", hint:"Intentional love wins"},
+        {q:"What's something beautiful you've noticed in your day-to-day life that you want to share with me?", hint:"Let me see your world"},
+        {q:"What ritual — even a small one — could we create to feel connected every single day?", hint:"Small things compound"},
+        {q:"What's a prayer you have for us in this season — say it to me right now?", hint:"Pray it together right now"},
+        {q:"What would it feel like to you when the distance is finally over — really over?", hint:"Hold that vision"},
+        {q:"What's something about this season that you'll look back on and be grateful for?", hint:"Find the gift in it"},
+        {q:"What's one thing I can do from here that would make you feel genuinely loved this week?", hint:"Tell me — I'll do it"},
+        {q:"Is there a version of yourself you've been becoming over there that you're afraid I won't recognise?", hint:"Distance grows people separately"},
+        {q:"What's something you've been carrying that you haven't wanted to burden me with?", hint:"Let me carry it with you"},
+        {q:"What does our communication feel like to you right now — is there anything you want more of?", hint:"Honest check"},
+        {q:"What's something about us that you hold onto when the distance feels heaviest?", hint:"Name your anchor"},
+        {q:"What do you want our life together to look like — and does thinking about it still excite you?", hint:"Vision keeps hope alive"},
+      ]
+    },
+    {
+      id:'longdist-trust', name:'Trust and Closeness', emoji:'🔐',
+      desc:'Before you assume silence means something — talk about this.',
+      bg:'#0A1208', accent:'#22C55E', hint:'Trust is built in the gaps',
+      cards:[
+        {q:"What does loyalty feel like to you practically — not in concept — when we're apart?", hint:"Define it together"},
+        {q:"What keeps you connected to me on the days when you feel the most distant?", hint:"Name your anchor"},
+        {q:"What's something you need from me during this season that you haven't asked for yet?", hint:"Ask — I want to give it"},
+        {q:"How can I show you I'm fully present with you even from here?", hint:"Tell me"},
+        {q:"What would make you feel more secure and at peace in what we have?", hint:"I want to provide that"},
+        {q:"When communication is harder than usual, what do you want to remember about us?", hint:"Name it so we can hold it"},
+        {q:"What's something you're trusting me with during this season that takes real courage?", hint:"I see that and I honour it"},
+        {q:"What has this season of distance taught you about how you love?", hint:"Distance reveals depth"},
+        {q:"How do you want us to handle hard days when we can't physically be there for each other?", hint:"Build a plan together"},
+        {q:"What does it look like when you feel most connected to me — even from far away?", hint:"Recreate that"},
+        {q:"What's something you're believing about us that keeps you grounded when it's hard?", hint:"Faith in us matters"},
+        {q:"What's one creative way we could celebrate each other this week from a distance?", hint:"Love is creative"},
+        {q:"What's a quality in me that you hold onto when things feel uncertain?", hint:"I want to be that for you"},
+        {q:"How do you want to handle the times when one of us is struggling and the other can't fix it?", hint:"Presence over solutions"},
+        {q:"What's something you want to build or plan together even while we're still apart?", hint:"Shared vision closes distance"},
+        {q:"What does it feel like when I show up for you unexpectedly — even a small gesture from far away?", hint:"I'll keep doing that"},
+        {q:"What makes you feel most at peace about where we're headed?", hint:"Name your peace"},
+        {q:"What does trust look like to you when it's working well between us?", hint:"Define healthy"},
+        {q:"What's something you want us to grow in during this season — even from a distance?", hint:"Intentional growth"},
+        {q:"What's a fear about distance that you haven't fully said out loud?", hint:"Name it so we can address it together"},
+        {q:"What's something you do on hard nights to feel close to me?", hint:"I love knowing this"},
+        {q:"What does it feel like to choose this every day even when it's hard?", hint:"Choosing love is not passive"},
+        {q:"What's something about our relationship that distance has made clearer to you?", hint:"Clarity is a gift"},
+        {q:"What's one thing you need us to commit to for the rest of this season?", hint:"Make the commitment together"},
+        {q:"What does it mean to you that we're choosing this when it's hard?", hint:"Love is chosen most when it costs the most"},
+      ]
+    },
+  ],
+
+  parenting:[
+    {
+      id:'parenting-heart', name:"Your Child's Heart", emoji:'❤️',
+      desc:"Before you assume they're fine — ask these tonight.",
+      bg:'#180A0E', accent:'#F43F5E', hint:'They feel more than they say',
+      cards:[
+        {q:"What's something that happened this week that made you feel really happy?", hint:"Start with the good"},
+        {q:"What's the best part of your day usually — and why?", hint:"Know their joy"},
+        {q:"Is there someone in your life right now who makes you feel really good about yourself?", hint:"Know their people"},
+        {q:"What's something you're really proud of about yourself lately?", hint:"Help them name their wins"},
+        {q:"What do you wish we talked about more?", hint:"Open the door"},
+        {q:"When do you feel most loved in our family?", hint:"Listen carefully"},
+        {q:"What's something you're really good at that you don't think I notice enough?", hint:"See them fully"},
+        {q:"What's one thing you'd love for us to do together soon?", hint:"Put it on the calendar"},
+        {q:"What makes you feel brave when something is hard?", hint:"Know what fuels them"},
+        {q:"What's something you've been thinking about lately that you haven't told me yet?", hint:"Open the door gently"},
+        {q:"Who do you feel safest talking to when something is bothering you?", hint:"No judgment — just curiosity"},
+        {q:"What do you love most about our family?", hint:"Gratitude is a gift"},
+        {q:"What's something you want me to know about how you're feeling lately?", hint:"I'm listening — really"},
+        {q:"What do you think I love most about you?", hint:"Make sure they know"},
+        {q:"Is there something you've been hoping I'd ask you about?", hint:"You might be surprised"},
+        {q:"What does it feel like when our home is at its best?", hint:"They feel it too"},
+        {q:"What's something you've learned recently that excited you?", hint:"Celebrate their curiosity"},
+        {q:"What's a dream you have for yourself that you haven't told me?", hint:"Make room for their vision"},
+        {q:"What do you wish more people knew about you?", hint:"Help them be seen"},
+        {q:"What makes you feel like you can do hard things?", hint:"Build their confidence"},
+        {q:"What's something I do that makes you feel really loved?", hint:"I'll do it more"},
+        {q:"What's something kind that someone did for you recently?", hint:"Kindness is worth celebrating"},
+        {q:"When did you feel most like yourself this week?", hint:"Know what brings them alive"},
+        {q:"What's something you're looking forward to?", hint:"Hope is a gift to cultivate"},
+        {q:"What do you want our home to feel like when you walk through the door?", hint:"Their answer is a blueprint"},
+        {q:"What's something about yourself that you really like?", hint:"Healthy self-love is important"},
+        {q:"What's something you want God to help you with right now?", hint:"Faith starts young"},
+        {q:"What do you think I'm most proud of about you?", hint:"Tell them — don't let them guess"},
+        {q:"What's something you've done for someone else recently that made you feel good?", hint:"Generosity shapes character"},
+        {q:"What's one word you'd use to describe how you feel about our family?", hint:"That one word is important"},
+      ]
+    },
+    {
+      id:'parenting-see', name:'Behind the Smile', emoji:'🎭',
+      desc:'Your child may be smiling and still need you to go deeper.',
+      bg:'#080C18', accent:'#818CF8', hint:'The smile can be a mask',
+      cards:[
+        {q:"Is there anything that's been on your mind lately that you haven't wanted to worry me with?", hint:"Let them know it won't be a burden"},
+        {q:"What's something that felt a little hard this week that you pushed through anyway?", hint:"Celebrate their resilience"},
+        {q:"Is there anyone who's been making things harder for you lately?", hint:"Open the door calmly"},
+        {q:"What's something you've been figuring out on your own that you might want help with?", hint:"You're not alone"},
+        {q:"When something upsets you, what do you usually do with that feeling?", hint:"Help them name it"},
+        {q:"Is there something at school or with friends that's been sitting on your heart?", hint:"A gentle question opens more than a direct one"},
+        {q:"What do you wish adults understood about what it feels like to be your age right now?", hint:"Listen — really listen"},
+        {q:"Is there something you've seen or heard that confused you or stuck with you?", hint:"They process more than we realise"},
+        {q:"What's something you've been worried about that might sound small but feels big to you?", hint:"All feelings are valid"},
+        {q:"Is there something you feel like you have to carry alone — that you'd feel better sharing?", hint:"I'm here for it"},
+        {q:"What do you do when you feel left out or lonely?", hint:"Know their coping"},
+        {q:"Is there something you wish you could change about a friendship right now?", hint:"Guide, don't solve"},
+        {q:"When life feels hard, what makes you feel better — what actually helps?", hint:"Know their comfort"},
+        {q:"Is there something you've been praying about that you want to pray about together?", hint:"Faith opens conversations"},
+        {q:"What's something that made you feel strong this week — even if it was small?", hint:"Strength builds on itself"},
+        {q:"Is there something you feel like you're not good enough at that I wish you knew wasn't true?", hint:"Speak life"},
+        {q:"What's something you're learning about yourself lately?", hint:"Self-awareness is a gift"},
+        {q:"Is there something you want to ask me but you're not sure how I'll respond?", hint:"I promise I'll listen first"},
+        {q:"What do you wish more people said to you?", hint:"Then say it — right now"},
+        {q:"What does it look like when you're really okay — and what does it look like when you're not?", hint:"Help them know the difference"},
+        {q:"What's something you've been pretending isn't bothering you?", hint:"Safe space to say it"},
+        {q:"Is there something about home that feels safe — and something that doesn't?", hint:"Both answers matter"},
+        {q:"What's something you've been hoping I'd notice without you having to say it?", hint:"I'm paying attention now"},
+        {q:"What does it feel like when something is wrong and you don't know how to start the conversation?", hint:"Let's practice right now"},
+        {q:"Is there something you want to tell me about your inner world that you've never found the right moment for?", hint:"This is that moment"},
+      ]
+    },
+    {
+      id:'parenting-words', name:'Words That Last', emoji:'💬',
+      desc:'The words your child carries — and the ones they need more of.',
+      bg:'#120818', accent:'#A78BFA', hint:'Words build or break',
+      cards:[
+        {q:"What's something I say to you a lot that really encourages you?", hint:"Say it even more"},
+        {q:"What's the most meaningful thing I've ever said to you that you still remember?", hint:"Those words are alive in them"},
+        {q:"What do you wish I said to you more?", hint:"Write it down — then do it"},
+        {q:"When I tell you I'm proud of you, does it feel real — or does it feel like it has conditions?", hint:"This one is important"},
+        {q:"What's something you'd love to hear from me that you've never heard me say?", hint:"I want to say it"},
+        {q:"When I speak about you to other people, what do you hope I say?", hint:"Tell them — and mean it"},
+        {q:"What word would you use to describe how it feels when I talk to you about hard things?", hint:"Learn your impact"},
+        {q:"Is there something I've said — even as a joke — that you'd love for me to stop saying?", hint:"Honour the request without defensiveness"},
+        {q:"What do I say that makes you feel like you can do anything?", hint:"That's the sentence to repeat daily"},
+        {q:"What does it feel like when I tell you I love you — does it ever feel like more than words?", hint:"Show them, not just tell"},
+        {q:"What's something I've said about your future that you've held onto?", hint:"Words are seeds"},
+        {q:"What do I say that makes you feel safe to mess up and try again?", hint:"Grace is a language"},
+        {q:"When you've done something wrong, what words from me help you feel restored — not just corrected?", hint:"Correction with love"},
+        {q:"What do you wish I asked you more?", hint:"Then ask it regularly"},
+        {q:"What's something you've always wanted to tell me — but weren't sure how I'd take it?", hint:"I'm ready to hear it"},
+        {q:"What words of mine do you carry with you when you're not at home?", hint:"Your words travel with them"},
+        {q:"What do I say when I'm at my best as a parent — that you want more of?", hint:"Be that version on purpose"},
+        {q:"Is there a name or nickname — even a loving one — that you'd rather I didn't use?", hint:"Words stick"},
+        {q:"What does my voice sound like when you feel most loved by me?", hint:"Tone is everything"},
+        {q:"What's one thing you want me to always say to you — no matter how old you get?", hint:"Commit to it tonight"},
+        {q:"What have I said that you wish I'd said sooner?", hint:"Timing matters too"},
+        {q:"What's something I say that makes home feel safe?", hint:"That's worth repeating"},
+        {q:"What does it feel like when I speak life over you in front of other people?", hint:"Public affirmation is powerful"},
+        {q:"What's something I say when I'm upset that you'd want me to say differently?", hint:"Receive this without defensiveness"},
+        {q:"What do you want to say to me that you've been keeping inside?", hint:"I'm ready to receive it"},
+      ]
+    },
+    {
+      id:'parenting-legacy', name:'Love Not Pressure', emoji:'🌱',
+      desc:'Parent with presence, not just expectation.',
+      bg:'#080C0A', accent:'#34D399', hint:'Legacy lives in the little things',
+      cards:[
+        {q:"Do you feel like I love you exactly as you are — not just when you do well or behave?", hint:"They need to feel this every day"},
+        {q:"When you fail or make a mistake, what do you expect from me before I even speak?", hint:"Know what you're projecting"},
+        {q:"What do you think makes me most proud of you — and is it something you can control?", hint:"Make sure it's character, not performance"},
+        {q:"Is there something you love doing that you've been scared to show me?", hint:"Make room for their whole self"},
+        {q:"Do you feel like home is a place you can fully be yourself — even on your worst day?", hint:"That's the goal"},
+        {q:"What's something you want me to be excited about with you — even if it's not what I expected?", hint:"Love follows them, not your plan"},
+        {q:"What do you think I would say if you told me your biggest dream?", hint:"Their answer reveals what you've communicated"},
+        {q:"Is there a version of yourself you feel free to be at home that you can't be anywhere else?", hint:"That's what safety feels like"},
+        {q:"What's something you've wanted to try or explore that you weren't sure I'd support?", hint:"Try saying yes before no"},
+        {q:"What does it feel like when I cheer for you — does it feel genuine and specific?", hint:"Be loud and specific in your praise"},
+        {q:"Do you feel pressure to be a certain way for me — or do you feel free?", hint:"Honest answer matters"},
+        {q:"What's something you've accomplished recently that you want me to know you're proud of?", hint:"Let them initiate the celebration"},
+        {q:"What do you think I value most in life — and do you feel like that makes space for who you are?", hint:"Your values speak louder than words"},
+        {q:"Is there a gift or ability in you that you feel I haven't fully seen yet?", hint:"Look closer — then say something"},
+        {q:"What would it mean to you if I told you that you never have to earn my love?", hint:"Say it — then prove it"},
+        {q:"What does it feel like when I defend you or speak well of you to others?", hint:"They're listening and watching"},
+        {q:"What's something about who you are — not what you do — that you want me to celebrate more?", hint:"Identity over achievement"},
+        {q:"Do you feel like my love for you is unconditional — and how do you know that?", hint:"Their answer is your homework"},
+        {q:"What kind of parent do you want to be one day — and what have I shown you about that?", hint:"You're modelling right now"},
+        {q:"What's one thing you need from me right now that isn't about performance or achievement?", hint:"Just be with them"},
+        {q:"What does it feel like when I celebrate who you are becoming rather than what you're producing?", hint:"Becoming over achieving"},
+        {q:"Is there something I've expected of you that didn't feel fair?", hint:"Receive this humbly"},
+        {q:"What do you wish I understood about the pressure you already put on yourself?", hint:"They may already be harder on themselves than you are"},
+        {q:"What's something about yourself that you love — that has nothing to do with what you're good at?", hint:"Identity runs deeper than talent"},
+        {q:"What would it feel like to know that nothing you could do would change how I see you?", hint:"Unconditional love needs to be felt, not just said"},
+      ]
+    },
+  ],
+  singles:[
+    {
+      id:'singles-self', name:'Know Yourself First', emoji:'🪞',
+      desc:'Before you step into the next chapter — understand who you are.',
+      bg:'#120A18', accent:'#8B5CF6', hint:'Self-knowledge is the greatest gift',
+      cards:[
+        {q:"What do you love most about who you're becoming in this season?", hint:"Name it with confidence"},
+        {q:"What values do you most want a future relationship to be built on — and are you living them now?", hint:"Know this before you date"},
+        {q:"What does emotional health look like in your life right now — practically, not theoretically?", hint:"Honest reflection"},
+        {q:"What are you most proud of about yourself in this season that has nothing to do with a relationship?", hint:"Own it"},
+        {q:"What do you feel most called to right now — and are you pursuing it?", hint:"Purpose fuels wholeness"},
+        {q:"What's a habit or practice that has shaped you most in the last year?", hint:"Growth is real"},
+        {q:"What kind of person do you want to be — not just in a relationship, but in life?", hint:"Character first"},
+        {q:"What does it feel like when you're fully in alignment — spiritually, emotionally, and physically?", hint:"Know that feeling"},
+        {q:"What's something about yourself that you've grown to genuinely appreciate — that you used to resist?", hint:"Self-love is healthy"},
+        {q:"What does a healthy, thriving version of your daily life look like?", hint:"Build toward it"},
+        {q:"What's a gift or strength in you that you want to invest in this season?", hint:"Don't let it sit idle"},
+        {q:"What does rest and restoration look like for you — and are you getting enough?", hint:"Wholeness requires rest"},
+        {q:"What's something you're learning about yourself through your friendships?", hint:"Others reflect us"},
+        {q:"What's a belief about yourself that has shifted in the last year — and for the better?", hint:"Growth changes our narrative"},
+        {q:"What kind of energy do you want to bring into a future relationship — are you building it now?", hint:"Become it now"},
+        {q:"What's a prayer you have for your own growth in this season?", hint:"Bring God into it"},
+        {q:"What's something you've done recently that made you genuinely proud of yourself?", hint:"Celebrate it"},
+        {q:"What kind of support do you need in a relationship — and do the people in your life give you that now?", hint:"Know your needs"},
+        {q:"What's a pattern in your past you've consciously decided to break — and how's that going?", hint:"Awareness is the first step"},
+        {q:"What does God say about you that you're learning to actually believe?", hint:"Identity is anchored in Him"},
+        {q:"What's something about being single in this season that you're genuinely grateful for?", hint:"There are gifts here"},
+        {q:"What area of your life has grown the most in the past two years?", hint:"Acknowledge the progress"},
+        {q:"What's a boundary you've set in your life that has protected your peace?", hint:"Honour it"},
+        {q:"What does thriving — not just surviving — look like for you in this specific season?", hint:"Name it and pursue it"},
+        {q:"What's something you've stopped apologising for that you were never wrong about?", hint:"Reclaimed"},
+        {q:"What's something you would tell your past self about this season that would have surprised you?", hint:"Growth with perspective"},
+        {q:"What does solitude feel like to you right now — peaceful or painful?", hint:"Your answer reveals a lot"},
+        {q:"What's a version of yourself that's emerging in this season that you want to protect?", hint:"Guard what's growing"},
+        {q:"What would it look like to fully embrace and invest in this exact season of your life?", hint:"Not waiting — actually here"},
+        {q:"What's one thing you want to say yes to in yourself before you say yes to someone else?", hint:"Become first"},
+      ]
+    },
+    {
+      id:'singles-ready', name:'Ready for Love?', emoji:'💫',
+      desc:'Not readiness as a destination — but as a practice.',
+      bg:'#0A0C18', accent:'#38BDF8', hint:'Wholeness attracts wholeness',
+      cards:[
+        {q:"What do you genuinely bring to a relationship — beyond how you make someone feel?", hint:"Know your gifts"},
+        {q:"What does a healthy, God-honouring relationship look like to you day to day — in the ordinary?", hint:"Describe the ordinary"},
+        {q:"What qualities in a person make you feel genuinely safe — not just attracted?", hint:"Safety is the foundation"},
+        {q:"What does it look like for you to be loved well — specifically, not generally?", hint:"Know your language"},
+        {q:"What are you actively working on about yourself that will make you a better partner?", hint:"Growth is attractive"},
+        {q:"What's something you've learned about love from watching healthy couples that you want for yourself?", hint:"Good models are teachers"},
+        {q:"What does it feel like when someone honours your values rather than just tolerates them?", hint:"Don't settle below that"},
+        {q:"What does having a spiritually grounded partner mean to you practically?", hint:"Define it clearly"},
+        {q:"What's a standard you hold for how you're treated — and do you hold it consistently?", hint:"Standards protect you"},
+        {q:"What's something you've learned about yourself from past relationships that you're grateful for?", hint:"Every season teaches"},
+        {q:"What does it mean to you to choose someone — not just feel chosen?", hint:"Love is also a choice"},
+        {q:"What kind of friendship do you want to have with a future partner first?", hint:"Friendship is the foundation"},
+        {q:"What's something you're believing God for when it comes to love and relationship?", hint:"Name your faith"},
+        {q:"What does it look like to guard your heart while also staying genuinely open?", hint:"Balance matters"},
+        {q:"What does it feel like when someone leads with honour and genuine intention?", hint:"Name that feeling — you deserve it"},
+        {q:"What's one area of your own emotional health you're actively investing in right now?", hint:"Wholeness is the work"},
+        {q:"What kind of community do you want to be rooted in together with a future partner?", hint:"Think ahead"},
+        {q:"What does loving someone in their fullness — not just their highlights — look like to you?", hint:"Real love is chosen daily"},
+        {q:"What does it mean to you that love should be peaceful — not just passionate?", hint:"Peace is underrated"},
+        {q:"What's something you want in a relationship that you've been afraid to say out loud?", hint:"Say it here"},
+        {q:"What's a version of yourself in a relationship that you want to protect — someone who doesn't lose themselves?", hint:"Identity survives love"},
+        {q:"What would you want a future partner to know about what you've been through?", hint:"Your story matters"},
+        {q:"What does it look like to be patient without becoming passive in this season?", hint:"Active waiting"},
+        {q:"What's one thing you want to say yes to in yourself before you say yes to someone else?", hint:"Become first"},
+        {q:"What would it feel like to be chosen by someone who truly sees all of you?", hint:"You deserve that"},
+      ]
+    },
+    {
+      id:'singles-purpose', name:'Life and Purpose', emoji:'🔮',
+      desc:"Who are you becoming — and what are you building with this season?",
+      bg:'#0A0818', accent:'#A78BFA', hint:'This season is not wasted',
+      cards:[
+        {q:"What's a dream you're actively investing in right now — not just thinking about?", hint:"Action makes it real"},
+        {q:"What does a deeply fulfilling life look like to you — in the next five years?", hint:"Paint the picture"},
+        {q:"What does success mean to you — in your own words, not anyone else's definition?", hint:"Own your definition"},
+        {q:"What's a calling or gift in you that you know is meant to be used — and are you using it?", hint:"Purpose is urgent"},
+        {q:"What small step this week would move you meaningfully toward the life you actually want?", hint:"Start there"},
+        {q:"What's something God has shown you about your future that you're still holding onto?", hint:"Hold it with faith"},
+        {q:"What's a gift in you that the people who love you have always seen — even when you couldn't?", hint:"Receive that"},
+        {q:"What would your life look like if you fully trusted that God was for you?", hint:"Live from that place"},
+        {q:"What's something you want to build, create, or contribute during your lifetime?", hint:"Think beyond yourself"},
+        {q:"What area of your life has the most momentum right now — and how can you steward it?", hint:"Invest where things are growing"},
+        {q:"What would you pursue if you knew it was impossible to fail?", hint:"That desire is a clue"},
+        {q:"What community do you want to be rooted in — and are you building toward that?", hint:"You need people"},
+        {q:"What's a season of your life that shaped your sense of purpose most deeply?", hint:"Trace the thread"},
+        {q:"What's something you believe about yourself that fuels your vision for your future?", hint:"Belief precedes becoming"},
+        {q:"What impact do you most want to have on the people around you?", hint:"Legacy starts now"},
+        {q:"What's a dream you've been afraid to say out loud — but you know is real?", hint:"Say it here"},
+        {q:"What does financial freedom mean to you — and are you building toward it?", hint:"Steward this season well"},
+        {q:"What's something you want to give back once you're further along in your journey?", hint:"Generosity is a compass"},
+        {q:"What's a vision for your life that excites you every time you think about it?", hint:"Hold it — feed it"},
+        {q:"What do you believe God is preparing you for that isn't fully visible yet?", hint:"Trust the process"},
+      ]
+    },
+  ],
+
+  healing:[
+    {
+      id:'healing-gentle', name:'Gentle Ground', emoji:'🌿',
+      desc:'Slow, safe questions for people doing the deep work.',
+      bg:'#080C0A', accent:'#34D399', hint:"Healing is not linear — and that's okay",
+      cards:[
+        {q:"What's something you've released this season that made you feel lighter?", hint:"Name the freedom"},
+        {q:"What does safety feel like in your body — and when do you most experience it?", hint:"Learn to recognise it"},
+        {q:"Who in your life makes you feel most like yourself — without any performance?", hint:"Stay close to them"},
+        {q:"What's a truth about yourself that you're learning to believe more fully?", hint:"Truth sets us free"},
+        {q:"What does rest genuinely feel like for you — when do you actually experience it?", hint:"Rest is sacred"},
+        {q:"What has grown in you this year that you wouldn't have believed was possible a year ago?", hint:"Honour the growth"},
+        {q:"What's something about your own story that you've made peace with?", hint:"Peace is progress"},
+        {q:"What does it feel like when you're living from a healed place rather than a hurting one?", hint:"Know the difference"},
+        {q:"What relationship in your life has been most restorative recently?", hint:"Lean into it"},
+        {q:"What's a lie you no longer believe about yourself — and what replaced it?", hint:"The replacement is the gift"},
+        {q:"What's a practice or discipline that has been most life-giving for you in this season?", hint:"Do more of it"},
+        {q:"What does it feel like to be on your own side?", hint:"Compassion for yourself"},
+        {q:"What's something you've given yourself permission to feel that you previously pushed away?", hint:"Feelings need room"},
+        {q:"What's a chapter of your story that you can now look back on with gratitude?", hint:"Redemption changes the ending"},
+        {q:"What's something you've forgiven that has genuinely freed you — not just in words?", hint:"Real forgiveness transforms"},
+        {q:"What does thriving look like for you — not just coping, not just surviving?", hint:"Name it clearly"},
+        {q:"What's something you've stopped apologising for that you were never wrong about?", hint:"Reclaimed"},
+        {q:"What's something in your healing journey that has surprised you in a beautiful way?", hint:"Grace shows up unexpected"},
+        {q:"What do you most want to say to the version of yourself who was in the hardest place?", hint:"Write them a letter in your heart"},
+        {q:"What's something you're currently choosing hope about — even when you can't see the full picture?", hint:"Faith in the unseen"},
+        {q:"What role has community played in your healing?", hint:"We heal in relationship"},
+        {q:"What's a word you'd use to describe who you're becoming?", hint:"Own it"},
+        {q:"What's something beautiful that has come out of a difficult season?", hint:"Beauty for ashes is real"},
+        {q:"What does it feel like when you truly believe you are worthy of love?", hint:"You are"},
+        {q:"What's one declaration you want to make over your life right now?", hint:"Say it out loud"},
+        {q:"What's something about yourself that you're learning to celebrate rather than change?", hint:"Some things deserve to be kept"},
+        {q:"What does compassion toward yourself actually look like on a hard day?", hint:"Practice it"},
+        {q:"What's something your body has been telling you that your mind keeps ignoring?", hint:"Listen to both"},
+        {q:"What's a moment in the past year where you chose yourself — and what did that feel like?", hint:"Choosing yourself is healing"},
+        {q:"What's something about your healing that no one else can see but you know is real?", hint:"Internal growth is still growth"},
+      ]
+    },
+    {
+      id:'healing-together', name:'Healing in Relationship', emoji:'🧬',
+      desc:'For couples and partners navigating healing side by side.',
+      bg:'#180A10', accent:'#F472B6', hint:'We heal in relationship',
+      cards:[
+        {q:"What does it feel like when you know I'm a safe place for your healing — not a trigger?", hint:"I want to be safe for you"},
+        {q:"What do you need from me when you're in a hard emotional moment — presence, space, or words?", hint:"Teach me your language"},
+        {q:"Is there something from your past that I can help you carry — by simply understanding it better?", hint:"Let me in gently"},
+        {q:"What does it feel like when I see you at your most vulnerable and I don't pull away?", hint:"I'm not going anywhere"},
+        {q:"What's something that has healed between us that you want to acknowledge and celebrate?", hint:"Name what's been restored"},
+        {q:"What's a trigger you have that makes more sense when you trace it back — and can you share it?", hint:"Understanding is compassion"},
+        {q:"What does a safe conversation feel like to you — what conditions make it possible?", hint:"Help me create that"},
+        {q:"What do you most need me to believe about you — especially on your hard days?", hint:"I'll hold that belief for you"},
+        {q:"What's something you're healing from that I can commit to learning more about?", hint:"I want to understand your world"},
+        {q:"What does it feel like when I lead with curiosity instead of conclusions?", hint:"Curiosity is one of love's languages"},
+        {q:"What's a pattern between us that has shifted — and what made that possible?", hint:"Honour the change"},
+        {q:"What do you want me to say when you're spiralling — and what should I not say?", hint:"Give me the map"},
+        {q:"What's something you've both healed from together that has bonded you in a way nothing else could?", hint:"Shared healing creates depth"},
+        {q:"What's one commitment you want to make to your healing — individually and together?", hint:"Covenant to growth"},
+        {q:"What does it feel like when I choose to believe the best about you even when you're struggling?", hint:"Love believes all things"},
+        {q:"What's a way I've grown in how I love you that you want to acknowledge?", hint:"Celebrate the progress"},
+        {q:"What's something about being known by me that has been healing?", hint:"Being seen is powerful"},
+        {q:"What would it look like to build a relationship culture where healing is safe for both of you?", hint:"Culture is intentional"},
+        {q:"What's a prayer you want to pray over each other's healing right now?", hint:"Do it — out loud, together"},
+        {q:"What does it mean to you when I don't try to fix your pain but just sit in it with you?", hint:"Presence over solutions"},
+        {q:"What's a wound between us that you believe is genuinely healing — even if it's not complete?", hint:"Acknowledge the progress"},
+        {q:"What would it feel like if healing was something we did together rather than separately?", hint:"Side by side"},
+        {q:"What does it look like when I carry your story carefully — with honour?", hint:"You entrusted me with it"},
+        {q:"What's one thing you want to heal from this year — and how can I help?", hint:"Name it and invite partnership"},
+        {q:"What does it feel like when we pray or worship together during a hard season?", hint:"God in the room changes everything"},
+      ]
+    },
+    {
+      id:'healing-attachment', name:'How You Love', emoji:'🔬',
+      desc:'Explore the roots of how you attach — and how to love better.',
+      bg:'#0A0C18', accent:'#818CF8', hint:'Patterns can be healed',
+      cards:[
+        {q:"When you feel someone pulling away — even slightly — what do you notice first in yourself?", hint:"Awareness is the first step"},
+        {q:"Do you find it easier to give love or receive it — and what do you think is behind that?", hint:"Both are skills"},
+        {q:"What did love look and feel like in the home you grew up in — and how has that shaped you?", hint:"Origin reveals pattern"},
+        {q:"What does it feel like to be fully known and still fully loved?", hint:"That's grace"},
+        {q:"When you're most anxious in a relationship, what do you most need — and what do you usually do instead?", hint:"The gap is the work"},
+        {q:"What does a secure, settled love feel like to you compared to an anxious or uncertain one?", hint:"Learn to know the difference"},
+        {q:"What's something about how you love that you've come to understand better in recent years?", hint:"Self-knowledge grows"},
+        {q:"When someone is fully present with you — not distracted, not performing — how does that feel?", hint:"Presence is a gift"},
+        {q:"What does it feel like when you're allowed to need someone without it being too much?", hint:"Needs are not burdens"},
+        {q:"What's an attachment pattern you've noticed in yourself that you're actively choosing to heal?", hint:"Awareness is courage"},
+        {q:"What does it feel like when love doesn't have to be earned?", hint:"Grace is a different kind of love"},
+        {q:"What's the most loving thing someone has ever done for you that cost them nothing materially?", hint:"Presence over presents"},
+        {q:"What do you do when you feel disconnected from someone you love — and what would actually help?", hint:"Know your process"},
+        {q:"What does it feel like when someone stays — when they had every reason to leave but chose to stay?", hint:"Steadfast love is healing"},
+        {q:"What's something about the way you love that you've come to celebrate?", hint:"Own your gifts"},
+        {q:"What's a relational wound that has been genuinely healed — and what was the turning point?", hint:"Redemption is real"},
+        {q:"What does it feel like to fully trust someone — and when did you last feel that?", hint:"Trust is earned and given"},
+        {q:"What's something you wish someone had understood about you earlier in your life?", hint:"You can say it now"},
+        {q:"What does receiving love gracefully — without deflecting or minimising — look like for you?", hint:"It's a practice"},
+        {q:"What's one thing you've learned about yourself through the work of healing?", hint:"Every insight is a gift"},
+      ]
+    },
+    {
+      id:'healing-peace', name:'Peace and Rest', emoji:'💨',
+      desc:"Before you assume you just need to push through — pause and go here.",
+      bg:'#08121A', accent:'#06B6D4', hint:'Peace is a pursuit',
+      cards:[
+        {q:"What in your life right now is giving you energy — and what is draining it?", hint:"Know the difference"},
+        {q:"What would it feel like to have one full day where nothing was required of you?", hint:"Rest is a right"},
+        {q:"What's something you keep saying yes to that your soul is quietly saying no to?", hint:"Honour that voice"},
+        {q:"What does peace feel like for you — not just calm, but genuine soul rest?", hint:"You deserve to know"},
+        {q:"What's a boundary that, if you held it more consistently, would change everything?", hint:"Boundaries are love"},
+        {q:"What does your body tell you when you're operating outside your capacity?", hint:"Listen to it"},
+        {q:"What's something you've been carrying that was never yours to carry?", hint:"Put it down"},
+        {q:"What would it look like to give yourself the same grace you give people you love?", hint:"You deserve it too"},
+        {q:"What's a rhythm in your week that genuinely restores you — and are you protecting it?", hint:"Guard it fiercely"},
+        {q:"What does it feel like when you are truly rested — not just less busy?", hint:"That's what you're after"},
+        {q:"What are you holding onto tightly right now that might feel different if you offered it to God?", hint:"Release is a spiritual act"},
+        {q:"What's something you've been overthinking that needs a decision — or permission to release?", hint:"Name it"},
+        {q:"What does simplicity look like in your life — and does your life currently have any?", hint:"Simple is sustainable"},
+        {q:"What would you do with more margin — more space and time — if you had it?", hint:"Create it intentionally"},
+        {q:"What helps you return to yourself after a hard or overwhelming season?", hint:"Know your reset"},
+        {q:"What's a way you've been showing up for others that you also need to show up for yourself?", hint:"You can't pour from empty"},
+        {q:"What does it look like to trust God with the things that are outside your control?", hint:"Surrender is peace"},
+        {q:"What's something you're learning about what your body, mind, and soul need in this season?", hint:"Listen deeply"},
+        {q:"What would full peace in your life feel like — and what would have to be true for it to exist?", hint:"Build toward it"},
+        {q:"What's one thing you could say no to this week that would give you more life?", hint:"No is a complete sentence"},
+      ]
+    },
+  ],
+
+  faith:[
+    {
+      id:'faith-soul', name:'Soul Questions', emoji:'✨',
+      desc:'Go deeper than Sunday — talk about your real faith life.',
+      bg:'#08060E', accent:'#818CF8', hint:'Your soul has something to say',
+      cards:[
+        {q:"What has God been saying to you recently that you've been sitting with?", hint:"Share it out loud"},
+        {q:"What season of your faith felt most alive — and what was happening then?", hint:"Return to what worked"},
+        {q:"What's something you believe about God that has changed or deepened in the last year?", hint:"Theology grows"},
+        {q:"What's a prayer you've been praying consistently — and what has that done for your faith?", hint:"Faithfulness in prayer"},
+        {q:"What does intimacy with God actually feel like for you — not in theory, in practice?", hint:"Be specific"},
+        {q:"What's a scripture that has felt like a personal word to you this season?", hint:"The Word is living"},
+        {q:"What does worship look like for you on an ordinary Tuesday — not just Sunday?", hint:"Faith is a lifestyle"},
+        {q:"Where do you feel God is most actively working in your life right now?", hint:"Name it with gratitude"},
+        {q:"What's something you're believing God for that requires genuine faith — not certainty?", hint:"Faith is in the uncertainty"},
+        {q:"What does surrender actually look like for you — not just as a concept?", hint:"Practical faith"},
+        {q:"What's a testimony from your life that you don't talk about enough?", hint:"Declare what He's done"},
+        {q:"What's something God has redeemed in your story that you could not have planned?", hint:"Redemption is His signature"},
+        {q:"What does it feel like when you're completely honest with God — not performing, just real?", hint:"He can handle it"},
+        {q:"What's a calling or assignment you've sensed on your life that you're still stepping into?", hint:"Say it out loud"},
+        {q:"What does obedience cost you right now — and how are you choosing it anyway?", hint:"Faith with skin on"},
+        {q:"What's a character quality God is developing in you that you can see clearly in hindsight?", hint:"He wastes nothing"},
+        {q:"What's something you've had to trust God with that you couldn't resolve yourself?", hint:"Dependence is not weakness"},
+        {q:"What does community and belonging look like in your spiritual life right now?", hint:"We need each other"},
+        {q:"What's something you feel God is calling you to lay down in order to step forward?", hint:"Release to receive"},
+        {q:"What would fully trusting God with your next chapter actually look like for you?", hint:"Name it concretely"},
+        {q:"What does gratitude look like in your daily life — not as a feeling but as a practice?", hint:"Gratitude is a discipline"},
+        {q:"What's a way you've seen God's faithfulness in the last twelve months?", hint:"Tell the story"},
+        {q:"What does rest in God feel like — different from just taking a break?", hint:"Soul rest is different"},
+        {q:"What's a spiritual discipline that has shaped you more than you expected?", hint:"Keep doing it"},
+        {q:"What's a declaration you want to make over your life — from a place of faith, not fear?", hint:"Declare it"},
+        {q:"What's something you've been afraid to ask God for?", hint:"Ask Him"},
+        {q:"What would it look like for your faith to be visible in your everyday relationships this week?", hint:"Faith in the details"},
+        {q:"What's something you stopped believing that you want to believe again?", hint:"Renewed faith is possible"},
+        {q:"What's a promise from God that you've been holding onto — and what has that been like?", hint:"Standing is a choice"},
+        {q:"What would you want to say to God tonight — just between you and Him?", hint:"He's listening"},
+      ]
+    },
+    {
+      id:'faith-couples', name:'Faith as a Couple', emoji:'🙏',
+      desc:'Grow together in faith — not just alongside each other.',
+      bg:'#0E0818', accent:'#C084FC', hint:'A couple that prays together',
+      cards:[
+        {q:"What has God been saying to each of you individually — and where does it overlap?", hint:"Find the shared thread"},
+        {q:"What does a spiritually connected version of us look like — practically, day to day?", hint:"Design it together"},
+        {q:"What's a prayer we could commit to praying together consistently starting this week?", hint:"Start tonight"},
+        {q:"What area of our life together needs the most prayer right now?", hint:"Agree on it"},
+        {q:"What does it look like when we're aligned spiritually — how does our relationship feel different?", hint:"Name that feeling"},
+        {q:"What's something God has taught you through being in relationship with me?", hint:"Beautiful question"},
+        {q:"How do we handle it when we're in different places spiritually — and how can we do it better?", hint:"Grace in the gap"},
+        {q:"What's a vision for our spiritual life together that we've never fully spoken out loud?", hint:"Say it now"},
+        {q:"What does worship look like in our home — and how do we want to grow in this?", hint:"Culture is built"},
+        {q:"What's something we're believing God for together right now?", hint:"Agree in faith"},
+        {q:"What would it look like to make God more central in how we make decisions together?", hint:"Practical faith"},
+        {q:"What does accountability look like between us spiritually — and is it working?", hint:"Honest check"},
+        {q:"What has our relationship taught both of us about God's character?", hint:"He uses love to reveal Himself"},
+        {q:"What's a way we can serve or give together that feels meaningful to both of us?", hint:"Purpose beyond just us"},
+        {q:"What kind of spiritual legacy do you want us to leave for the people around us?", hint:"Think generationally"},
+        {q:"What's a testimony we have together that we don't talk about enough?", hint:"Declare it"},
+        {q:"What would fasting or intentional seeking look like for us as a couple this season?", hint:"Go deeper together"},
+        {q:"What community or church is a spiritual home for us — and are we rooted in it?", hint:"Roots matter"},
+        {q:"What does it feel like when we pray together — really pray, not just say words?", hint:"Do that more"},
+        {q:"What's one step we could take this week toward a more spiritually intentional life together?", hint:"Make it small and doable"},
+      ]
+    },
+  ],
+
+  friends:[
+    {
+      id:'friends-deep', name:'Real Talk', emoji:'🗣️',
+      desc:'The conversations best friends should be having but never do.',
+      bg:'#0E0C18', accent:'#818CF8', hint:'Real friendship goes here',
+      cards:[
+        {q:"What's something you've been going through lately that you haven't told many people?", hint:"I want to know"},
+        {q:"When did you last feel truly supported by me — and when did you feel like I missed it?", hint:"Both answers matter"},
+        {q:"What's a dream or goal you have that you feel like the people around you don't fully understand?", hint:"I want to understand it"},
+        {q:"What's something you wish you could be more honest about in this friendship?", hint:"Safe space to say it"},
+        {q:"What's something about yourself that has changed in the last year that you haven't fully talked through?", hint:"Change deserves conversation"},
+        {q:"What's something you've been figuring out alone that would feel different if you said it out loud?", hint:"Say it here"},
+        {q:"What's something I do that makes you feel like a valued friend — and something I could do better?", hint:"Both are gifts"},
+        {q:"What does a truly safe friendship feel like to you — and do we have that?", hint:"Honest answer"},
+        {q:"What's something about your life right now that you're more scared of than you've let on?", hint:"Fear is honest"},
+        {q:"What's a season of your life that I don't know about that shaped who you are?", hint:"Fill in the gaps"},
+        {q:"What have you needed from our friendship lately that you haven't asked for?", hint:"Ask now"},
+        {q:"What's something you admire about me that you've never directly said?", hint:"Say it"},
+        {q:"What's something I've done that meant more to you than I probably realised?", hint:"Let me know"},
+        {q:"What's a hard truth about yourself that you've been sitting with?", hint:"You don't have to sit with it alone"},
+        {q:"What's something you want to be held accountable for in this season?", hint:"That's what friends are for"},
+        {q:"What area of your life do you feel like you're growing fastest in right now?", hint:"Celebrate it together"},
+        {q:"What's something you're grateful for about our friendship that doesn't get said enough?", hint:"Name it tonight"},
+        {q:"What's a belief you hold that you've been curious whether I share?", hint:"Explore it together"},
+        {q:"What's something you want more of in our friendship?", hint:"Ask for it"},
+        {q:"What would you want me to do if I could tell something was wrong but you hadn't said it yet?", hint:"Give me permission"},
+        {q:"What's something you've been wanting to ask me but held back?", hint:"Ask it now"},
+        {q:"What season of our friendship do you look back on most fondly?", hint:"Go back there"},
+        {q:"What's something about who you're becoming that you want me to see and celebrate?", hint:"I want to be part of that"},
+        {q:"What does it feel like when a friendship actually sees your full self — have we done that?", hint:"Wholeness in friendship"},
+        {q:"What's one thing you want us to do together this year that would make our friendship stronger?", hint:"Invest intentionally"},
+        {q:"What does it look like when I've shown up for you at your best — and at your worst?", hint:"Consistency is love"},
+        {q:"What's something you wish more people understood about who you really are?", hint:"Tell me"},
+        {q:"What's a goal I should know about so I can cheer for you?", hint:"Let me in"},
+        {q:"What's something about me that you've always been curious about but never asked?", hint:"Ask now"},
+        {q:"What would it mean to you to know that I'm genuinely proud of you?", hint:"I am — let me tell you"},
+      ]
+    },
+    {
+      id:'friends-growth', name:'Growing Together', emoji:'🌱',
+      desc:'Friends who sharpen each other build something rare.',
+      bg:'#080C0A', accent:'#34D399', hint:'Iron sharpens iron',
+      cards:[
+        {q:"What's the most important thing you've learned in the last year — and has it changed how you live?", hint:"Growth shows up in decisions"},
+        {q:"What's something you want to be challenged on by the people who know you best?", hint:"Accountability is a gift"},
+        {q:"What's a habit or discipline you've been wanting to build — and what's in the way?", hint:"Name the obstacle"},
+        {q:"What's something you've been doing differently lately that you think is making you better?", hint:"Name the growth"},
+        {q:"What's a belief you hold that you've changed your mind about — and what shifted?", hint:"Growth requires flexibility"},
+        {q:"What area of your life has the most room for growth right now — and are you investing there?", hint:"Where attention goes, growth flows"},
+        {q:"What's something you've been learning about yourself through your work, relationships, or faith?", hint:"Life is the classroom"},
+        {q:"What's a book, idea, or experience that has most shaped you in the last year?", hint:"Share what shaped you"},
+        {q:"What does it look like when you're at your healthiest — and are you there right now?", hint:"Honest check"},
+        {q:"What's something you want to grow in that you haven't told many people about?", hint:"Name the intention"},
+        {q:"What's something I could do or say that would help you grow in this season?", hint:"Friends invest in each other"},
+        {q:"What's a pattern you've noticed in yourself that you're trying to break?", hint:"Awareness is the start"},
+        {q:"What's a dream you're taking steps toward that most people don't know about?", hint:"Let me cheer for it"},
+        {q:"What does your best self look like in three years — and what are you doing today toward it?", hint:"Future self is a compass"},
+        {q:"What's something about your spiritual or emotional growth that has surprised you?", hint:"Grace surprises"},
+        {q:"What's one area where you want me to push you — not enable you?", hint:"Real friends don't just affirm"},
+        {q:"What's a conversation you've been avoiding with yourself?", hint:"This is the moment"},
+        {q:"What's something you're proud of in your own growth that you haven't celebrated?", hint:"Celebrate it together"},
+        {q:"What's a question you've been sitting with that you'd love to think through together?", hint:"Two minds are better"},
+        {q:"What's something you want to give more of yourself to in this next season?", hint:"Intentional investment"},
+        {q:"What's a strength in me that you think I underuse?", hint:"Honest observation"},
+        {q:"What are you learning about what you actually need versus what you thought you needed?", hint:"Needs evolve"},
+        {q:"What does a life well-lived look like to you — and are you moving toward it?", hint:"The question that anchors everything"},
+        {q:"What's something about your current season that's harder than you expected?", hint:"Hard things deserve to be named"},
+        {q:"What's one thing you'd want a future version of yourself to thank you for doing right now?", hint:"Wisdom is living for the future self"},
+      ]
+    },
+    {
+      id:'friends-memories', name:'Our Story', emoji:'📸',
+      desc:'Revisit the friendship that brought you here.',
+      bg:'#181405', accent:'#EAB308', hint:'Some friendships are once in a lifetime',
+      cards:[
+        {q:"What's the memory of us that you always come back to?", hint:"Tell me that one"},
+        {q:"What's the funniest thing we've been through together — the one that still gets you?", hint:"Laugh about it again"},
+        {q:"When did you first realise this friendship was something different?", hint:"Go back to the beginning"},
+        {q:"What's something I did for you that you've never properly thanked me for?", hint:"Do it now"},
+        {q:"What's a hard season you watched me go through — and what did you learn from watching?", hint:"Friends see what we can't"},
+        {q:"What story about us do you love telling other people?", hint:"I want to hear your version"},
+        {q:"What's a moment between us that you'd frame on a wall?", hint:"That one mattered"},
+        {q:"What's something we did together that you didn't realise would become a core memory?", hint:"The unplanned ones are often the best"},
+        {q:"What's a chapter of our friendship that you look back on with the most tenderness?", hint:"Take me there"},
+        {q:"What's something I said to you once that you still carry?", hint:"Words live on"},
+        {q:"What's the most fun we've ever had together — and could we recreate it?", hint:"Let's try"},
+        {q:"What's a decision I made that you supported even when you weren't sure — and how did that feel?", hint:"Loyalty is a love language"},
+        {q:"What's the hardest season of our friendship — and what did it teach you about us?", hint:"Tested friendships are deeper"},
+        {q:"What's something about our friendship that you think is genuinely rare?", hint:"Name it and protect it"},
+        {q:"What version of me have you always believed in — even when I didn't?", hint:"That belief carried me"},
+        {q:"What's something we built together — tangible or not — that you're proud of?", hint:"Own it"},
+        {q:"What's a risk you watched me take that made you proud of me?", hint:"Say it out loud"},
+        {q:"What would you say about our friendship if you had to describe it to someone who'd never seen anything like it?", hint:"That's a beautiful question"},
+        {q:"What's something that has stayed the same between us — no matter how much we've both changed?", hint:"That's the core of it"},
+        {q:"What chapter of our friendship do you most want to write next?", hint:"Write it together"},
+      ]
+    },
+  ],
+
+  latenights:[
+    {
+      id:'latenights-real', name:'Say The Real Thing', emoji:'🕯',
+      desc:"It's late. The walls are down. Say what you've been holding.",
+      bg:'#0A0818', accent:'#A78BFA', hint:'No filter after midnight',
+      cards:[
+        {q:"What's the most honest answer you could give to 'how are you really doing'?", hint:"No 'I'm fine'"},
+        {q:"What's something you've been grateful for recently that you haven't said out loud?", hint:"Name it tonight"},
+        {q:"What's a hope you have right now that you've been carrying quietly?", hint:"Let it breathe"},
+        {q:"What's something you've been figuring out that you haven't talked to anyone about?", hint:"Say it here"},
+        {q:"What would you do differently if you weren't afraid of getting it wrong?", hint:"Fear is smaller than it seems"},
+        {q:"What's a version of yourself you're becoming that excites you?", hint:"Declare it"},
+        {q:"What's something you've realised about yourself this year that surprised you?", hint:"Growth reveals things"},
+        {q:"What's something beautiful that happened this week that deserves to be marked?", hint:"Name it — celebrate it"},
+        {q:"What's a conversation you've been wanting to have that you haven't found the courage for yet?", hint:"This might be the moment"},
+        {q:"What do you most want someone to truly understand about you right now?", hint:"Say it — I'm listening"},
+        {q:"What's something you've been carrying alone that you'd feel lighter releasing?", hint:"You don't have to carry it alone"},
+        {q:"What does being truly known feel like to you — when has someone come close?", hint:"That experience is a gift"},
+        {q:"What's a decision you've made recently that you're at peace about?", hint:"Peace is a sign"},
+        {q:"What's something you've forgiven — and how has it changed you?", hint:"Forgiveness transforms"},
+        {q:"What's something you've been moving toward that you haven't told many people about?", hint:"Share it with someone safe"},
+        {q:"What has surprised you about your own resilience recently?", hint:"You're stronger than you knew"},
+        {q:"What's a relationship in your life that has been deeply life-giving lately?", hint:"Celebrate that person"},
+        {q:"What would you say to the version of yourself from two years ago?", hint:"Wisdom earned"},
+        {q:"What's something you're looking forward to — even if it's small?", hint:"Hope in the details"},
+        {q:"What's a question you have about your own life that you're okay not having the answer to yet?", hint:"Peace in the process"},
+        {q:"What does it feel like when you're living from a place of peace rather than pressure?", hint:"Know that feeling — return to it"},
+        {q:"What's something you've released this season that was holding you back?", hint:"Release is progress"},
+        {q:"What does it feel like when someone fully believes in you — without conditions?", hint:"You deserve that"},
+        {q:"What's one thing you want to say yes to in your life this week?", hint:"One yes can change everything"},
+        {q:"What does it feel like to be exactly where you are — and to trust that it's enough?", hint:"Here is holy ground"},
+        {q:"What's something about tonight that you want to carry with you?", hint:"Mark this moment"},
+        {q:"What's something you've been meaning to say to someone that you keep putting off?", hint:"Say it soon"},
+        {q:"What's one thing you're choosing to believe about yourself right now?", hint:"Declare it"},
+        {q:"What do you want your life to feel like — not look like — a year from now?", hint:"Feelings are the real goal"},
+        {q:"What's something you've been protecting yourself from that might actually be good for you?", hint:"Fear and wisdom are different things"},
+      ]
+    },
+    {
+      id:'latenights-us', name:'Just Us', emoji:'🌌',
+      desc:'Late night conversations that bring two people closer.',
+      bg:'#080612', accent:'#6366F1', hint:'These are the conversations worth staying up for',
+      cards:[
+        {q:"What's something about you that you wish more people took the time to discover?", hint:"I want to discover it"},
+        {q:"What's something I do that makes you feel like yourself?", hint:"Name it — I'll do it more"},
+        {q:"What's a memory we share that always makes you smile?", hint:"Tell me that one"},
+        {q:"What does it feel like right now — being here, talking like this?", hint:"Name the feeling"},
+        {q:"What's something about your life right now that you're at peace with?", hint:"Peace is worth noticing"},
+        {q:"What's something you've been figuring out lately that you want to share?", hint:"I'm all ears"},
+        {q:"What's a dream or vision you have that you've been protecting — and would you share it?", hint:"Your dreams are safe here"},
+        {q:"What do you think we do best together — and are we doing enough of it?", hint:"Do more of that"},
+        {q:"What's something you appreciate about who I've become that you haven't said?", hint:"Say it now"},
+        {q:"What's something about this conversation — right now — that feels good?", hint:"Notice the good"},
+        {q:"What's a question you've always wanted someone to ask you?", hint:"Ask it back"},
+        {q:"What does connection feel like when it's real — what's different about right now?", hint:"This is it"},
+        {q:"What's something you've been looking forward to that you want me to know about?", hint:"I want to be excited with you"},
+        {q:"What's a belief you hold about the future that keeps you hopeful?", hint:"Name your hope"},
+        {q:"What does it mean to you to be truly known by someone?", hint:"You're being known right now"},
+        {q:"What's something about tonight that you want to remember?", hint:"Make a mental photograph"},
+        {q:"What's a quality in me that you find yourself thinking about when we're apart?", hint:"Tell me"},
+        {q:"What does being loved well feel like for you — and are you experiencing it?", hint:"You deserve the answer to be yes"},
+        {q:"What's something about the future that you're quietly excited about?", hint:"Let the excitement out"},
+        {q:"What would you want to say to me right now if you knew I could handle anything?", hint:"I can handle it — say it"},
+      ]
+    },
+  ],
+
+  fun:[
+    {
+      id:'fun-wouldyou', name:'Would You Rather', emoji:'🤔',
+      desc:'Every option is a disaster. Pick one.',
+      bg:'#181005', accent:'#F59E0B', hint:'No both. Pick one.',
+      cards:[
+        {q:"Would you rather I told you every petty thought I had about you for 24 hours — or kept them all inside forever?", hint:"Both are terrifying"},
+        {q:"Would you rather I forgot your birthday — or remembered and said 'oh yeah, happy birthday' at 11:58pm?", hint:"One is worse"},
+        {q:"Would you rather I narrated everything you did like a nature documentary — or gave you a weekly performance review?", hint:"Choose your torture"},
+        {q:"Would you rather find out I have a hidden folder of your worst photos — or that I've shown them to the group chat?", hint:"They exist either way"},
+        {q:"Would you rather I only responded to messages with one word — or left you on read for exactly 3 hours every time?", hint:"Pick your nightmare"},
+        {q:"Would you rather I cried at every single argument — or never showed any emotion at all?", hint:"Both are chaos"},
+        {q:"Would you rather I gave you a detailed critique of everything you ate for a week — or narrated your sleep habits?", hint:"Pick one"},
+        {q:"Would you rather go one week with no phone but full access to me — or have your phone but I'm on silent?", hint:"What does your answer say?"},
+        {q:"Would you rather always know when someone is lying to you — or never feel heartbreak again?", hint:"Trade-offs"},
+        {q:"Would you rather have one conversation with your future self — or one letter from your past self?", hint:"What would they say?"},
+        {q:"Would you rather I became obsessed with a hobby that took all my evenings — or I had no hobbies whatsoever?", hint:"Neither is ideal"},
+        {q:"Would you rather be slightly too early to everything for the rest of your life — or chronically 11 minutes late?", hint:"Be honest"},
+        {q:"Would you rather have a perfect memory of every moment — or the ability to forget anything you choose?", hint:"This one runs deep"},
+        {q:"Would you rather have everyone like you but no one deeply know you — or be known deeply by very few?", hint:"Quality vs. quantity"},
+        {q:"Would you rather only be able to whisper — or only be able to talk at full volume?", hint:"Think it through"},
+        {q:"Would you rather have the courage to say every hard thing you've held back — or perfect timing for every conversation?", hint:"Power question"},
+        {q:"Would you rather relive the best day of your life — or get one extra day to do something you never did?", hint:"What would you choose?"},
+        {q:"Would you rather love someone deeply who can't fully love you back — or be deeply loved by someone you can't fully love?", hint:"That one stings"},
+        {q:"Would you rather know the exact day something great is coming — or be surprised by it?", hint:"Anticipation vs. wonder"},
+        {q:"Would you rather be wildly successful doing something you're average at — or quietly brilliant at something no one notices?", hint:"Say why"},
+      ]
+    },
+    {
+      id:'fun-mostlikely', name:'Most Likely To', emoji:'👉',
+      desc:'Point with confidence. No hesitation.',
+      bg:'#051808', accent:'#10B981', hint:'Point on 3',
+      cards:[
+        {q:"Who is most likely to still be getting ready when the other is already in the car?", hint:"Point on 3"},
+        {q:"Who is most likely to replay a conversation and get offended about something that hasn't happened yet?", hint:"Pre-offended"},
+        {q:"Who is most likely to say 'I'm not hungry' then eat half the other person's plate?", hint:"We all know"},
+        {q:"Who is most likely to remember a minor disagreement from two years ago with perfect detail?", hint:"Date. Time. What they were wearing."},
+        {q:"Who is most likely to be the actual source of chaos in this dynamic?", hint:"Both point"},
+        {q:"Who is most likely to apologise for something that was clearly not their fault — just to end the tension?", hint:"Be honest"},
+        {q:"Who is most likely to start a sentence with 'I'm not trying to start anything but...'?", hint:"They're starting something"},
+        {q:"Who is most likely to be on their phone during a movie and then ask what just happened?", hint:"Not naming names"},
+        {q:"Who is most likely to have seventeen browser tabs open and know exactly what's in each one?", hint:"This is a personality"},
+        {q:"Who is most likely to fall asleep five minutes into a long conversation they started?", hint:"Classic"},
+        {q:"Who is most likely to send a voice note that's longer than most TED talks?", hint:"You know who"},
+        {q:"Who is most likely to say 'let's keep it simple' and then have a very elaborate plan?", hint:"Simple doesn't mean simple"},
+        {q:"Who is most likely to be the last one to notice something has changed in the house?", hint:"Blissfully unaware"},
+        {q:"Who is most likely to be having four conversations at once and thriving?", hint:"Multitasking supreme"},
+        {q:"Who is most likely to make everyone feel seen in a room within five minutes?", hint:"A gift"},
+        {q:"Who is most likely to say 'I'll be five minutes' and mean twenty-five?", hint:"Time is flexible for them"},
+        {q:"Who is most likely to plan the most thoughtful surprise — and almost ruin it by accident?", hint:"Heart was right"},
+        {q:"Who is most likely to end a difficult conversation with 'okay but are you good though?'", hint:"Peacemaker energy"},
+        {q:"Who is most likely to turn a simple errand into a full adventure?", hint:"Iconic"},
+        {q:"Who is most likely to have already thought about what they'd say in a hypothetical argument — just in case?", hint:"Prepared or paranoid?"},
+      ]
+    },
+    {
+      id:'fun-hottakes', name:'Hot Takes', emoji:'🌶️',
+      desc:'Unpopular opinions. No hedging. Say it with your chest.',
+      bg:'#180505', accent:'#EF4444', hint:'Say it with confidence',
+      cards:[
+        {q:"Give your most controversial take on relationships that you'd never say in a group chat.", hint:"No filter"},
+        {q:"What's something everyone thinks is romantic but you find genuinely unnecessary?", hint:"Trigger someone"},
+        {q:"What's a green flag people love that you actually think is overrated?", hint:"Hot take loading"},
+        {q:"What's something people say they want in a partner that they actually couldn't handle?", hint:"Facts only"},
+        {q:"What relationship advice do you think is almost universally wrong?", hint:"Disagree loudly"},
+        {q:"What's the most overrated relationship milestone people make a huge deal out of?", hint:"Name it"},
+        {q:"What's something that's called 'setting boundaries' that's actually just avoidance?", hint:"Spicy but go"},
+        {q:"What's a love language people rate highly that doesn't actually communicate love to most people?", hint:"Your opinion counts"},
+        {q:"What's something the 'relationship goals' content on social media gets completely wrong?", hint:"Real talk"},
+        {q:"What's something people do in relationships in the name of 'independence' that's actually just isolation?", hint:"Say it"},
+        {q:"What's a thing people chase in relationships that, when they get it, never actually satisfies them?", hint:"Name it"},
+        {q:"What's something about modern dating that you think is making things worse, not better?", hint:"Go"},
+        {q:"What's a relationship pattern that gets romanticised that is actually just codependency?", hint:"Someone needed to say it"},
+        {q:"What advice did someone give you about love that turned out to be completely wrong?", hint:"Unlearn it"},
+        {q:"What's something you used to think was a red flag but you now see as just a difference?", hint:"Growth changes the lens"},
+        {q:"What's the most useful piece of relationship advice that nobody wants to hear?", hint:"Hard truth = real love"},
+        {q:"What's something you've done in a relationship that you used to judge other people for?", hint:"Humility is a hot take"},
+        {q:"What's something about how people talk about 'healing' that you think misses the point?", hint:"Nuance matters"},
+        {q:"What's a popular self-improvement idea that you think is actually making people worse at relationships?", hint:"Spicy but true"},
+        {q:"What's something people say they value in a partner but their choices prove otherwise?", hint:"Actions tell the truth"},
+      ]
+    },
+    {
+      id:'fun-neverihave', name:'Never Have I Ever', emoji:'🙈',
+      desc:'Light version — you might still be surprised.',
+      bg:'#100818', accent:'#8B5CF6', hint:'One finger down if true',
+      cards:[
+        {q:"Never have I ever laughed so hard at the wrong moment that I had to leave the room.", hint:"One finger down"},
+        {q:"Never have I ever pretended to be asleep to get out of a conversation.", hint:"We see you"},
+        {q:"Never have I ever given advice I was not following myself at the time.", hint:"Pot. Kettle."},
+        {q:"Never have I ever said 'I'll be ready in 5 minutes' and meant it.", hint:"Classic"},
+        {q:"Never have I ever started a sentence with 'I'm not judging but...' and then judged.", hint:"We've all been here"},
+        {q:"Never have I ever eaten the last of something and quietly hoped no one noticed.", hint:"Suspicious silence"},
+        {q:"Never have I ever sent a message to the wrong person and had to think fast.", hint:"Heart rate went up just thinking about it"},
+        {q:"Never have I ever replayed a conversation in my head and come up with a much better response.", hint:"Too slow every time"},
+        {q:"Never have I ever cried at a commercial or a movie I claimed wasn't going to affect me.", hint:"The ad got you"},
+        {q:"Never have I ever made a decision that sounded logical but was completely emotional.", hint:"Rational on the surface"},
+        {q:"Never have I ever cleaned up quickly before someone came over and called it clean.", hint:"That counts, sort of"},
+        {q:"Never have I ever started a project I was excited about and then quietly never finished it.", hint:"The graveyard of good ideas"},
+        {q:"Never have I ever said yes to something I didn't want to do just to avoid the conversation.", hint:"The yes that cost you"},
+        {q:"Never have I ever convinced myself I wasn't tired and then fallen asleep immediately.", hint:"Five minutes later"},
+        {q:"Never have I ever heard a song and thought 'this was written about my life'.", hint:"Deeply relatable"},
+        {q:"Never have I ever rearranged something in a shared space and not told anyone.", hint:"Silently redecorating"},
+        {q:"Never have I ever gotten a great idea at midnight and been convinced it was genius.", hint:"3am CEO energy"},
+        {q:"Never have I ever received a compliment and immediately deflected it.", hint:"Receive it. Just try."},
+        {q:"Never have I ever chosen a film, spent 30 minutes picking, and then watched something I'd seen before.", hint:"Comfort over adventure, always"},
+        {q:"Never have I ever said 'we should do this more often' and then never planned it.", hint:"Intention without execution"},
+      ]
+    },
+    {
+      id:'fun-thisorthat', name:'This or That', emoji:'⚡',
+      desc:'Lightning round. First instinct wins.',
+      bg:'#181205', accent:'#FBBF24', hint:'First instinct. Go.',
+      cards:[
+        {q:"Knowing everything — OR feeling everything deeply?", hint:"First instinct"},
+        {q:"Be loved by many who barely know you — OR deeply known by just one?", hint:"Quality or quantity"},
+        {q:"Radical honesty always — OR thoughtful kindness that sometimes softens the truth?", hint:"Choose your world"},
+        {q:"Never be misunderstood again — OR never feel alone again?", hint:"Both hurt to lose"},
+        {q:"A life with no regrets — OR a life with no fear?", hint:"Different answers"},
+        {q:"Be the most interesting person in the room — OR the most trusted?", hint:"Two very different goals"},
+        {q:"Have the perfect words at the right time — OR the courage to speak even imperfectly?", hint:"Courage wins"},
+        {q:"Adventure with uncertainty — OR stability with some predictability?", hint:"Where do you lean?"},
+        {q:"Deep friendship with one person — OR wide community with many?", hint:"Neither is wrong"},
+        {q:"Change your past — OR know your future?", hint:"Both are complicated"},
+        {q:"More time — OR more energy?", hint:"What are you actually short on?"},
+        {q:"Say exactly what you mean, always — OR always know how to say it perfectly?", hint:"Authenticity or artistry"},
+        {q:"A peaceful life — OR an impactful one?", hint:"Can it be both?"},
+        {q:"Fast growth that's uncomfortable — OR slow growth that feels natural?", hint:"How do you grow best?"},
+        {q:"Be remembered for what you accomplished — OR for how you made people feel?", hint:"Legacy question"},
+        {q:"Deep rest for one full week — OR a month of doing exactly what you love?", hint:"What does your soul need?"},
+        {q:"Start over with everything you know now — OR continue from exactly where you are?", hint:"Gratitude check"},
+        {q:"One extraordinary moment that defines you — OR thousands of quiet ordinary ones?", hint:"The life is in the ordinary"},
+        {q:"Love that's safe but predictable — OR love that's electric but unpredictable?", hint:"Long-game versus short-game"},
+        {q:"Be fully understood — OR be fully free?", hint:"Some people think they're the same thing"},
+      ]
+    },
+    {
+      id:'fun-confessions', name:'Confessions', emoji:'🤫',
+      desc:"Lighthearted things you've been holding back. Go.",
+      bg:'#08081A', accent:'#6366F1', hint:"We're not judging — much",
+      cards:[
+        {q:"Confess something you claimed you didn't enjoy — and then secretly did.", hint:"Your face told on you"},
+        {q:"Confess an opinion you held firmly that turned out to be completely wrong.", hint:"Humility is growth"},
+        {q:"Confess something you do alone that you'd be mildly embarrassed to explain.", hint:"We've all got one"},
+        {q:"Confess a version of yourself that only surfaces in very specific company.", hint:"Which one is the real you?"},
+        {q:"Confess a time you gave very confident advice about something you had no experience with.", hint:"Expertise by Google"},
+        {q:"Confess something you judged someone for that you later did yourself.", hint:"The universe will humble you"},
+        {q:"Confess the most random thing you've ever worried about at 2am.", hint:"The brain does not sleep"},
+        {q:"Confess something you told yourself was being productive that was actually procrastination.", hint:"Strategic avoidance"},
+        {q:"Confess a film, show, or song you pretend not to like in certain company.", hint:"No shame — well, a little"},
+        {q:"Confess a moment when you were completely convinced you were right — and then you weren't.", hint:"The correction is the story"},
+        {q:"Confess something you've been meaning to do for over a year that you keep moving to next month.", hint:"This month is the month"},
+        {q:"Confess an assumption you made about someone that they completely disproved.", hint:"People surprise us"},
+        {q:"Confess something you still do that childhood-you would find hilarious.", hint:"Some things don't change"},
+        {q:"Confess a goal you set publicly that you quietly abandoned and hoped nobody noticed.", hint:"They noticed. It's okay."},
+        {q:"Confess the most ridiculous reason you've ever been in a bad mood.", hint:"Let it be funny now"},
+        {q:"Confess something you've convinced yourself you'll start after 'this season'.", hint:"There's always another season"},
+        {q:"Confess a belief you held for a long time that slowly and quietly changed — and when you noticed.", hint:"Beliefs evolve"},
+        {q:"Confess the most unnecessary purchase you've ever justified to yourself brilliantly.", hint:"The reasoning was airtight"},
+        {q:"Confess something you wish you'd said in a moment that you replayed later.", hint:"The words that came too late"},
+        {q:"Confess something you'd do differently about last year if you had the chance.", hint:"No regrets — just honesty"},
+      ]
+    },
+  ],
+};
+
+// ── STATE ──────────────────────────────────────────
+var state = {
+  tab: 'marriage',
+  cat: null,
+  deck: [],
+  idx: 0,
+  history: [],
+  favs: []
+};
+
+try { state.favs = JSON.parse(localStorage.getItem('kfavs') || '[]'); } catch(e) { state.favs = []; }
+
+// ── UTILS ──────────────────────────────────────────
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function toast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('on');
+  setTimeout(function() { el.classList.remove('on'); }, 1800);
+}
+
+function showScreen(id) {
+  document.getElementById('home').classList.remove('active');
+  document.getElementById('cards').classList.remove('active');
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── HOME ───────────────────────────────────────────
+function renderHome() {
+  // Tabs
+  var tabsEl = document.getElementById('tabs');
+  var tabHTML = '';
+  for (var i = 0; i < TABS.length; i++) {
+    var t = TABS[i];
+    tabHTML += '<div class="tab' + (t.id === state.tab ? ' on' : '') + '" data-id="' + t.id + '">' + t.label + '</div>';
+  }
+  tabsEl.innerHTML = tabHTML;
+
+  var tabEls = tabsEl.querySelectorAll('.tab');
+  for (var i = 0; i < tabEls.length; i++) {
+    tabEls[i].addEventListener('click', onTabClick);
+  }
+
+  // Hook
+  document.getElementById('hook-banner').textContent = HOOKS[state.tab] || '';
+
+  // Cats
+  var list = D[state.tab] || [];
+  document.getElementById('section-label').textContent = list.length + ' EDITIONS';
+  var catsEl = document.getElementById('cats');
+  var catHTML = '';
+  for (var i = 0; i < list.length; i++) {
+    var c = list[i];
+    catHTML += '<div class="cat" data-id="' + c.id + '" style="animation:slideIn .28s ease ' + (i * 0.05) + 's both">' +
+      '<div class="emo" style="background:' + c.bg + '">' + c.emoji + '</div>' +
+      '<div class="cat-info"><div class="cat-name">' + c.name + '</div><div class="cat-desc">' + c.desc + '</div></div>' +
+      '<div class="chevron">&#8250;</div></div>';
+  }
+  catsEl.innerHTML = catHTML;
+
+  var catEls = catsEl.querySelectorAll('.cat');
+  for (var i = 0; i < catEls.length; i++) {
+    catEls[i].addEventListener('click', onCatClick);
+  }
+}
+
+function onTabClick(e) {
+  var id = e.currentTarget.getAttribute('data-id');
+  state.tab = id;
+  renderHome();
+}
+
+function onCatClick(e) {
+  var id = e.currentTarget.getAttribute('data-id');
+  var list = D[state.tab] || [];
+  for (var i = 0; i < list.length; i++) {
+    if (list[i].id === id) { openDeck(list[i]); return; }
+  }
+}
+
+// ── DECK ───────────────────────────────────────────
+function openDeck(cat) {
+  state.cat = cat;
+  state.deck = shuffle(cat.cards);
+  state.idx = 0;
+  state.history = [];
+  document.getElementById('c-catname').textContent = cat.name;
+  document.getElementById('c-subdesc').textContent = cat.desc;
+  document.getElementById('done-ov').style.display = 'none';
+  document.getElementById('fav-btn').className = 'abtn abtn-fav';
+  document.getElementById('fav-btn').textContent = '♡';
+  showScreen('cards');
+  buildStack();
+}
+
+function buildStack() {
+  var wrap = document.getElementById('stack');
+  // Remove old cards
+  var old = wrap.querySelectorAll('.qcard');
+  for (var i = 0; i < old.length; i++) old[i].parentNode.removeChild(old[i]);
+
+  var tot = state.deck.length;
+  var cur = state.idx;
+
+  document.getElementById('c-num').textContent = (cur + 1) + '/' + tot;
+  document.getElementById('prog-fill').style.width = (cur / tot * 100) + '%';
+  document.getElementById('undo-btn').style.opacity = state.history.length > 0 ? '1' : '0.3';
+
+  // Add up to 3 cards (c2 bottom, c1 middle, c0 top)
+  var max = Math.min(2, tot - cur - 1);
+  for (var i = max; i >= 0; i--) {
+    var card = makeCardEl(state.deck[cur + i]);
+    card.className = 'qcard c' + i;
+    wrap.appendChild(card);
+  }
+
+  // Attach swipe to top card
+  var top = wrap.querySelector('.qcard.c0');
+  if (top) attachSwipe(top);
+}
+
+function makeCardEl(card) {
+  var cat = state.cat;
+  var el = document.createElement('div');
+  el.style.background = 'linear-gradient(160deg,' + cat.accent + 'EE 0%,' + cat.accent + '88 35%,' + cat.bg + ' 75%)';
+  el.innerHTML =
+    '<div class="qcard-edition">' + cat.name.toUpperCase() + ' &middot; KOINO</div>' +
+    '<div class="qcard-emoji">' + cat.emoji + '</div>' +
+    '<div class="qcard-q">' + (card.q || card) + '</div>' +
+    '<div class="qcard-foot">' +
+      '<div class="qcard-hint">' + (card.hint || '') + '</div>' +
+      '<div class="qcard-swipe">SWIPE &#8594;</div>' +
+    '</div>';
+  return el;
+}
+
+// ── SWIPE ──────────────────────────────────────────
+function attachSwipe(el) {
+  var x0 = 0, y0 = 0, xd = 0, active = false, horiz = null;
+
+  el.addEventListener('touchstart', function(ev) {
+    x0 = ev.touches[0].clientX;
+    y0 = ev.touches[0].clientY;
+    xd = 0; active = true; horiz = null;
+    el.style.transition = 'none';
+  }, {passive:true});
+
+  el.addEventListener('touchmove', function(ev) {
+    if (!active) return;
+    var dx = ev.touches[0].clientX - x0;
+    var dy = ev.touches[0].clientY - y0;
+    if (horiz === null) horiz = Math.abs(dx) > Math.abs(dy);
+    if (!horiz) return;
+    xd = dx;
+    el.style.transform = 'translateX(' + xd + 'px) rotate(' + (xd * 0.07) + 'deg)';
+    var sil = document.getElementById('si-l');
+    var sir = document.getElementById('si-r');
+    if (xd < -30) { sil.textContent = 'BACK'; sil.style.opacity = '' + Math.min(1,(Math.abs(xd)-30)/60); sir.style.opacity='0'; }
+    else if (xd > 30) { sir.textContent = 'NEXT'; sir.style.opacity = '' + Math.min(1,(xd-30)/60); sil.style.opacity='0'; }
+    else { sil.style.opacity='0'; sir.style.opacity='0'; }
+  }, {passive:true});
+
+  el.addEventListener('touchend', function(ev) {
+    if (!active) return;
+    active = false;
+    el.style.transition = '';
+    document.getElementById('si-l').style.opacity = '0';
+    document.getElementById('si-r').style.opacity = '0';
+    var d = xd; xd = 0;
+    if (d < -80) doUndo();
+    else if (d > 80) advance();
+    else el.style.transform = 'translateX(0) rotate(0)';
+  }, {passive:true});
+
+  // Desktop mouse
+  var md = false, mx0 = 0, mxd = 0;
+  el.addEventListener('mousedown', function(ev) {
+    md = true; mx0 = ev.clientX; mxd = 0;
+    el.style.transition = 'none';
+    ev.preventDefault();
+  });
+  window.addEventListener('mousemove', function(ev) {
+    if (!md) return;
+    mxd = ev.clientX - mx0;
+    el.style.transform = 'translateX(' + mxd + 'px) rotate(' + (mxd * 0.07) + 'deg)';
+  });
+  window.addEventListener('mouseup', function(ev) {
+    if (!md) return;
+    md = false; el.style.transition = '';
+    var d = mxd; mxd = 0;
+    if (d < -80) doUndo();
+    else if (d > 80) advance();
+    else el.style.transform = 'translateX(0) rotate(0)';
+  });
+}
+
+function advance() {
+  var wrap = document.getElementById('stack');
+  var top = wrap.querySelector('.qcard.c0');
+  if (!top) return;
+
+  state.history.push(state.idx);
+  top.classList.add('fly-right');
+  var dead = top;
+  setTimeout(function() { if (dead.parentNode) dead.parentNode.removeChild(dead); }, 400);
+
+  state.idx++;
+  var tot = state.deck.length;
+
+  if (state.idx >= tot) {
+    document.getElementById('prog-fill').style.width = '100%';
+    setTimeout(function() { document.getElementById('done-ov').style.display = 'flex'; }, 380);
+    return;
+  }
+
+  document.getElementById('c-num').textContent = (state.idx + 1) + '/' + tot;
+  document.getElementById('prog-fill').style.width = (state.idx / tot * 100) + '%';
+  document.getElementById('undo-btn').style.opacity = '1';
+
+  var c1 = wrap.querySelector('.qcard.c1');
+  var c2 = wrap.querySelector('.qcard.c2');
+  if (c1) { c1.classList.remove('c1'); c1.classList.add('c0'); attachSwipe(c1); }
+  if (c2) { c2.classList.remove('c2'); c2.classList.add('c1'); }
+  if (state.idx + 2 < tot) {
+    var nc = makeCardEl(state.deck[state.idx + 2]);
+    nc.className = 'qcard c2';
+    var first = wrap.querySelector('.qcard');
+    if (first) wrap.insertBefore(nc, first); else wrap.appendChild(nc);
+  }
+}
+
+function doUndo() {
+  if (state.history.length === 0) { toast('Already at the first card'); return; }
+  state.idx = state.history.pop();
+  buildStack();
+  toast('Going back');
+}
+
+function doFav() {
+  var card = state.deck[state.idx];
+  if (!card) return;
+  var key = card.q || String(state.idx);
+  var btn = document.getElementById('fav-btn');
+  var pos = state.favs.indexOf(key);
+  if (pos > -1) {
+    state.favs.splice(pos, 1);
+    btn.className = 'abtn abtn-fav';
+    btn.textContent = '♡';
+    toast('Removed');
+  } else {
+    state.favs.push(key);
+    btn.className = 'abtn abtn-fav faved';
+    btn.textContent = '♥';
+    toast('Saved ✦');
+  }
+  try { localStorage.setItem('kfavs', JSON.stringify(state.favs)); } catch(e) {}
+}
+
+// ── WIRE UP BUTTONS ────────────────────────────────
+document.getElementById('back-btn').addEventListener('click', function() { showScreen('home'); renderHome(); });
+document.getElementById('next-btn').addEventListener('click', advance);
+document.getElementById('undo-btn').addEventListener('click', doUndo);
+document.getElementById('fav-btn').addEventListener('click', doFav);
+document.getElementById('restart-btn').addEventListener('click', function() {
+  state.deck = shuffle(state.cat.cards);
+  state.idx = 0; state.history = [];
+  document.getElementById('done-ov').style.display = 'none';
+  buildStack();
+});
+document.getElementById('home-btn2').addEventListener('click', function() { showScreen('home'); renderHome(); });
+
+// ── START ──────────────────────────────────────────
+renderHome();
+</script>
+
+</body>
+</html>
